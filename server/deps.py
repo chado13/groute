@@ -1,5 +1,5 @@
-from config import config
-from assistant import GrouteAssistant
+from server.config import config
+from server.assistant import GrouteAssistant
 from functools import lru_cache
 
 @lru_cache()
