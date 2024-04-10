@@ -2,7 +2,7 @@ from fastapi import APIRouter, FastAPI, Body, Depends
 
 from pydantic import BaseModel, Field
 from typing import Annotated
-from deps import get_assistant
+from server.deps import get_assistant
 
 router = APIRouter()
 
