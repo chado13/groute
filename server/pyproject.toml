@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "app"
+name = "server"
 version = "0.1.0"
-description = "Your Best Route"
+description = "Greate Route For Your Trip"
 authors = ["chado13 <geaya13@gmail.com>"]
 readme = "README.md"
 

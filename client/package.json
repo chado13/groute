@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "client",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "nuxt": "^3.11.2",
-    "primevue": "^3.51.0",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "nuxt-primevue": "^0.3.1"
   },
   "devDependencies": {
     "nuxt-primevue": "^0.3.1"
