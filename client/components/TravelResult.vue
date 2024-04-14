@@ -1,6 +1,7 @@
 <template>
   <Dialog v-model:visible="visible" modal header="여행결과" class="result-modal">
     <div v-html="marked(text)"></div>
+    <div id="map">map~~</div>
   </Dialog>
 </template>
 
@@ -11,7 +12,7 @@ const props = defineProps<{
   text: string;
 }>()
 
-const visible = defineModel<boolean>("visible", {required: true})
+const visible = defineModel<boolean>("visible", { required: true })
 </script>
 
 <style>
