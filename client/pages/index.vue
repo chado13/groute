@@ -37,15 +37,15 @@
 
   </div>
   <ProgressSpinner class="progress-spinner" v-if="isLoading" />
-  <TravelResult v-model:visible="visible" :text="resultText" />
+  <ClientOnly>
+    <TravelResult v-model:visible="visible" :text="resultText" v-if="visible"/>
+    </ClientOnly>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
 import axios from 'axios';
 
-
 const router = useRouter();
-
 const placeholderText = '콤마(,)로 구분하여 방문하고 싶은 여행지 내 장소를 작성해 주세요.\n예제: 경복궁, 명동, 롯데타워'
 const formData = ref({
   destination: '',
@@ -70,6 +70,7 @@ const visible = computed({
     resultText.value = ''
   }
 })
+
 
 const submitForm = async () => {
   try {
