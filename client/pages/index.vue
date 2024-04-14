@@ -1,0 +1,98 @@
+<template>
+<div>
+    <h2>여행 정보 입력</h2>
+    <div class="p-fluid p-formgrid p-grid">
+      <!-- 여행 예정지 입력 -->
+      <div class="p-field p-col-12">
+        <label for="destination">여행 예정지</label>
+        <InputText id="destination" v-model="formData.destination" />
+      </div>
+
+      <!-- 관광 스팟 입력 -->
+      <div class="p-field p-col-12">
+        <label for="spots">관광 스팟</label>
+        <Textarea id="spots" v-model="formData.spots" rows="4" :placeholder="placeholderText"/>
+      </div>
+
+      <!-- 일정 입력 -->
+      <div class="p-field p-col-12">
+        <label for="schedule">일정</label>
+        <Calendar id="schedule" v-model="formData.schedule" selectionMode="range" :manualInput="false" dateFormat="yy/mm/dd" type="date"/>
+      </div>
+
+      <!-- 이용 교통 입력 -->
+      <div class="p-field p-col-12">
+        <label for="transport">이용 교통</label>
+        <Dropdown id="transport" :options="transportOptions" v-model="formData.transport" optionLabel="label" optionValue="value" placeholder="여행지 내 이용수단"/>
+      </div>
+
+      <!-- 폼 제출 버튼 -->
+      <div class="p-field p-col-12">
+        <p></p>
+        <Button label="제출" @click="submitForm" />
+      </div>
+    </div>
+
+  </div>
+  <ProgressSpinner class="progress-spinner" v-if="isLoading" />
+  <TravelResult v-model:visible="visible" :text="resultText" />
+</template>
+<script setup lang="ts">
+import { ref } from 'vue';
+import axios from 'axios';
+
+
+const router = useRouter();
+
+const placeholderText = '콤마(,)로 구분하여 방문하고 싶은 여행지 내 장소를 작성해 주세요.\n예제: 경복궁, 명동, 롯데타워'
+const formData = ref({
+  destination: '',
+  spots: '',
+  schedule: '',
+  transport:'',
+  arrival:'',
+  depart:'',
+  hotel:''
+})
+const resultText = ref('');
+const isLoading = ref(false);
+const transportOptions= [
+        { label: '자동차', value: '자동차' },
+        { label: '지하철', value: '지하철' },
+        { label: '버스', value: '버스' }
+      ]
+const visible = computed({
+    get: () => {
+        return !!resultText.value
+    }, set: () => {
+        resultText.value = ''
+    }
+})
+
+const submitForm = async () => {
+      try {
+        isLoading.value = true;
+        const response = await axios.post('http://localhost:8000/groute', formData.value);
+        console.log('폼 데이터가 성공적으로 전송되었습니다:', response.data);
+        resultText.value = response.data;
+      } catch (error) {
+        window.alert('폼 데이터 전송 중 오류 발생');
+        throw error
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+</script>
+
+<style scoped>
+
+.progress-spinner {
+    width: 50px;
+    height: 50px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+</style>
