@@ -33,6 +33,7 @@ class TripData(BaseModel):
     arrival: str | None
     depart: str | None
     transport: str
+    restorants: str
 
 
 class AssistantResponse(BaseModel):
@@ -52,7 +53,8 @@ def send_message(data: Annotated[TripData, Body], assistant=Depends(get_assistan
     content = (
         f"{data.destination}의 {data.spots}을  {data.schedule[0]} 부터 {data.schedule[1]}까지의 일정으로 여행할 예정입니다. "
         f"{data.arrival}에 도착하여 일정을 시작하여 {data.depart}에서 돌아갈 예정입니다."
-        f"여행일정 내내 {data.hotel}에서 숙박할 예정이고 주요 이동수단으로는 {data.transport}를 이용할 예정입니다."
+        f"여행일정 내내 {data.hotel}에서 숙박할 예정이고 {data.restorants}들에서 식사할 예정입니다."
+        f"주요 이동수단으로는 {data.transport}를 이용할 예정입니다."
     )
     assistant.send_message(content)
     message = assistant.run_assistant()

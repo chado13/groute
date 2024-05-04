@@ -21,6 +21,30 @@
           dateFormat="yy/mm/dd" type="date" />
       </div>
 
+      <!-- 여행 시작점 입력 -->
+      <div class="p-field p-col-12">
+        <label for="arrival">여행 시작점</label>
+        <Textarea id="arrival" v-model="formData.arrival" rows="1" placeholder="여행지 도착 역 ex) 서울역, 인청공항 등" />
+      </div>
+
+      <!-- 여행 끝점 입력 -->
+      <div class="p-field p-col-12">
+        <label for="depart">여행 끝</label>
+        <Textarea id="depart" v-model="formData.depart" rows="1" placeholder="여행지 끝" />
+      </div>
+
+      <!-- 여행 중 식사 장소 입력 -->
+      <div class="p-field p-col-12">
+        <label for="restorants">식사</label>
+        <Textarea id="restorants" v-model="formData.restorants" rows="4" placeholder="여행 중 식사 장소들" />
+      </div>
+
+      <!-- 여행 중 숙박 장소 입력 -->
+      <div class="p-field p-col-12">
+        <label for="hotel">숙박</label>
+        <Textarea id="hotel" v-model="formData.hotel" rows="1" placeholder="여행 중 숙박장소" />
+      </div>
+
       <!-- 이용 교통 입력 -->
       <div class="p-field p-col-12">
         <label for="transport">이용 교통</label>
@@ -54,7 +78,8 @@ const formData = ref({
   transport: '',
   arrival: '',
   depart: '',
-  hotel: ''
+  hotel: '',
+  restorants:''
 })
 const resultText = ref('');
 const isLoading = ref(false);
