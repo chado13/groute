@@ -1,18 +1,17 @@
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, FastAPI
+from fastapi import APIRouter, Body, Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 from server.deps import get_assistant
 
 app = FastAPI()
-
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-]
+templates = Jinja2Templates(directory="templates")
+origins = ["http://localhost", "http://localhost:3000", "http://localhost:8080"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -59,3 +58,12 @@ def send_message(data: Annotated[TripData, Body], assistant=Depends(get_assistan
     assistant.send_message(content)
     message = assistant.run_assistant()
     return message
+
+
+@app.get("/", response_class=HTMLResponse)
+def read_root(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="main.html",
+        context={"apikey": "13bf923174bc71a5dcded503e5f0416d"},
+    )
