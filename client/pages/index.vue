@@ -18,7 +18,7 @@
           rows="4"
           :placeholder="placeholderText"
         /> -->
-        <SpotInput v-model:spots="formData.spots" @spot-added="(v) => searchmap(v)"/>
+        <SpotInput v-model:spots="formData.spots" @spot-added="(v) => formData.spots.push(v)"/>
       </div>
 
       <!-- 일정 입력 -->
