@@ -13,11 +13,11 @@
       <div class="p-field p-col-12">
         <label for="spots">관광 스팟</label>
         <InputText v-model="spot" id="spot" @keyup.enter="searchMap" />
-
-        <!-- <SpotInput
-          v-model:spots="formData.spots"
-          @spot-added="(v) => formData.spots.push(v)"
-        /> -->
+        <Chip
+          v-for="spot in formData.spots"
+          :key="spot.name"
+          :label="spot.name"
+        />
       </div>
 
       <!-- 일정 입력 -->
@@ -107,11 +107,17 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 
 const router = useRouter();
+type placeItem = {
+  name: "";
+  address: "";
+  lat: 0;
+  lng: 0;
+};
 const placeholderText =
   "콤마(,)로 구분하여 방문하고 싶은 여행지 내 장소를 작성해 주세요.\n예제: 경복궁, 명동, 롯데타워";
 const formData = ref<{
   destination: string;
-  spots: string[];
+  spots: placeItem[];
   schedule: string;
   transport: string;
   arrival: string;
@@ -162,19 +168,27 @@ const submitForm = async () => {
     isLoading.value = false;
   }
 };
+
 function searchMap() {
   console.log(spot.value);
   const keyword = spot.value;
   if (!keyword) return;
   const ps = new kakao.maps.services.Places();
-  ps.keywordSearch(keyword, placesSearchCB);
+  ps.keywordSearch(formData.value.destination + keyword, placesSearchCB);
 }
 const placesSearchCB = (
   data: kakao.maps.services.PlacesSearchResult,
   status: kakao.maps.services.Status
 ): void => {
   if (status === kakao.maps.services.Status.OK) {
-    console.log(data);
+    const placeItem: placeItem = {
+      name: data[0].place_name,
+      address: data[0].address_name,
+      lat: data[0].y,
+      lng: data[0].x,
+    };
+    console.log(placeItem);
+    formData.value.spots.push(placeItem);
   }
 };
 </script>
