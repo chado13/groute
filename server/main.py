@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, TypedDict
 
 from fastapi import APIRouter, Body, Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,11 +23,17 @@ app.add_middleware(
 
 router = APIRouter()
 
+class SpotData(TypedDict):
+    name: str
+    address: str
+    lat: float
+    lag: float
+    category: str
 
 class TripData(BaseModel):
     destination: str = Field(examples=["서울"])
     schedule: list[datetime]
-    spots: str
+    spots: list[SpotData]
     hotel: str | None
     arrival: str | None
     depart: str | None
