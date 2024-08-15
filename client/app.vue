@@ -1,16 +1,13 @@
 <template>
   <NuxtPage />
 </template>
+
 <script setup lang="ts">
-  const runtimeConfig = useRuntimeConfig();
-  const appkey = runtimeConfig.public.kakaomapApi;
-  useHead({
-    script: [
-      {
-        src: `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&libraries=services`,
-        async: true,
-        type: "text/javascript",
-      },
-    ],
-  });
+import { useKakao } from "vue3-kakao-maps/@utils";
+const runtimeConfig = useRuntimeConfig();
+const appkey = runtimeConfig.public.kakaomapApi;
+
+onMounted(() => {
+  useKakao(appkey, ["clusterer", "services", "drawing"]);
+});
 </script>

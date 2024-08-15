@@ -2,7 +2,7 @@
   <div>
     <h2>여행 정보 입력</h2>
     <div class="p-fluid p-formgrid p-grid">
-      <div id="map" style="width:100%;height:350px;"></div>
+      <div id="map" style="width: 100%; height: 350px"></div>
       <!-- 여행 예정지 입력 -->
       <div class="p-field p-col-12">
         <label for="destination">여행 예정지</label>
@@ -12,13 +12,12 @@
       <!-- 관광 스팟 입력 -->
       <div class="p-field p-col-12">
         <label for="spots">관광 스팟</label>
-        <!-- <Textarea
-          id="spots"
-          v-model="formData.spots"
-          rows="4"
-          :placeholder="placeholderText"
+        <InputText v-model="spot" id="spot" @keyup.enter="searchMap" />
+
+        <!-- <SpotInput
+          v-model:spots="formData.spots"
+          @spot-added="(v) => formData.spots.push(v)"
         /> -->
-        <SpotInput v-model:spots="formData.spots" @spot-added="(v) => formData.spots.push(v)"/>
       </div>
 
       <!-- 일정 입력 -->
@@ -106,46 +105,20 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import SpotInput from "~/components/SpotInput.vue";
-
-const mapLoaded = ref(false)
-
-onMounted(() => {
-  // 카카오 맵 SDK가 로드되었는지 확인
-  const checkKakaoMap = setInterval(() => {
-    if (window.kakao && window.kakao.maps) {
-      mapLoaded.value = true
-      clearInterval(checkKakaoMap)
-      initMap()
-    }
-  }, 100)
-})
-
-function initMap() {
-  const mapContainer = document.getElementById('map')
-  const mapOption = { 
-    center: new window.kakao.maps.LatLng(33.450701, 126.570667),
-    level: 3
-  }
-
-  new window.kakao.maps.Map(mapContainer, mapOption)
-}
 
 const router = useRouter();
 const placeholderText =
   "콤마(,)로 구분하여 방문하고 싶은 여행지 내 장소를 작성해 주세요.\n예제: 경복궁, 명동, 롯데타워";
-const formData = ref<
- {
-    destination: string;
-    spots: string[];
-    schedule: string;
-    transport: string;
-    arrival: string;
-    depart: string;
-    hotel: string;
-    restorants: string;
- }
->({
+const formData = ref<{
+  destination: string;
+  spots: string[];
+  schedule: string;
+  transport: string;
+  arrival: string;
+  depart: string;
+  hotel: string;
+  restorants: string;
+}>({
   destination: "",
   spots: [],
   schedule: "",
@@ -155,6 +128,8 @@ const formData = ref<
   hotel: "",
   restorants: "",
 });
+const spot = ref("");
+
 const resultText = ref("");
 const isLoading = ref(false);
 const transportOptions = [
@@ -187,10 +162,21 @@ const submitForm = async () => {
     isLoading.value = false;
   }
 };
-
-// const searchmap = (v: string) => {
-//   new ;
-// };
+function searchMap() {
+  console.log(spot.value);
+  const keyword = spot.value;
+  if (!keyword) return;
+  const ps = new kakao.maps.services.Places();
+  ps.keywordSearch(keyword, placesSearchCB);
+}
+const placesSearchCB = (
+  data: kakao.maps.services.PlacesSearchResult,
+  status: kakao.maps.services.Status
+): void => {
+  if (status === kakao.maps.services.Status.OK) {
+    console.log(data);
+  }
+};
 </script>
 
 <style scoped>

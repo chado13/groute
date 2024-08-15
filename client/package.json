@@ -18,7 +18,8 @@
     "nuxt": "^3.11.2",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
-    "vue3-google-maps": "^0.0.1"
+    "vue3-google-maps": "^0.0.1",
+    "vue3-kakao-maps": "^2.3.9"
   },
   "devDependencies": {
     "nuxt-primevue": "^0.3.1"

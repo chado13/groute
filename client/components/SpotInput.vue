@@ -1,7 +1,7 @@
 <template>
   <div class="flex">
     <InputText v-model="value" />
-    <Button label="입력" @click="onClick" />
+    <Button label="입력" @click="onClick" id="a" />
   </div>
   <div>
     <Chip v-for="spot in props.spots" :key="spot" :label="spot" />
@@ -19,7 +19,7 @@ const props = defineProps<{
 const value = ref("");
 
 function onClick() {
-  console.log(value.value);
+  if (!value.value) return;
   emit("spot-added", value.value);
   value.value = "";
 }
