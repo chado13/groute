@@ -5,14 +5,19 @@
       <div id="map" style="width: 100%; height: 350px"></div>
       <!-- 여행 예정지 입력 -->
       <div class="p-field p-col-12">
-        <label for="destination">여행 예정지</label>
+        <label for="destination">여행 예정 도시</label>
         <InputText id="destination" v-model="formData.destination" />
       </div>
 
       <!-- 관광 스팟 입력 -->
       <div class="p-field p-col-12">
-        <label for="spots">관광 스팟</label>
-        <InputText v-model="spot" id="spot" @keyup.enter="searchMap" />
+        <label for="spots">여행 예정 장소</label>
+        <InputText
+          v-model="spot"
+          id="spot"
+          @keyup.enter="searchMap"
+          placeholder="장소를 입력후 엔터를 해주세요. 지점이 여러개일 경우 정확히 입력해주세요."
+        />
         <Chip
           v-for="spot in formData.spots"
           :key="spot.name"
@@ -40,7 +45,7 @@
           id="arrival"
           v-model="formData.arrival"
           rows="1"
-          placeholder="여행지 도착 역 ex) 서울역, 인청공항 등"
+          placeholder="여행을 어디에서부터 계획할지 정해주세요. ex) 서울역, 인청공항 등"
         />
       </div>
 
@@ -51,12 +56,12 @@
           id="depart"
           v-model="formData.depart"
           rows="1"
-          placeholder="여행지 끝"
+          placeholder="여행의 마지막을 어디에서 끝낼지 정해주세요. 예) 서울역, 인천공항 등"
         />
       </div>
 
       <!-- 여행 중 식사 장소 입력 -->
-      <div class="p-field p-col-12">
+      <!-- <div class="p-field p-col-12">
         <label for="restorants">식사</label>
         <Textarea
           id="restorants"
@@ -64,7 +69,7 @@
           rows="4"
           placeholder="여행 중 식사 장소들"
         />
-      </div>
+      </div> -->
 
       <!-- 여행 중 숙박 장소 입력 -->
       <div class="p-field p-col-12">
@@ -73,7 +78,7 @@
           id="hotel"
           v-model="formData.hotel"
           rows="1"
-          placeholder="여행 중 숙박장소"
+          placeholder="여행 중 정해진 숙박장소가 있다면 입력해주세요. 지점이 여러개일 경우 정확히 입력해주세요."
         />
       </div>
 
@@ -86,7 +91,7 @@
           v-model="formData.transport"
           optionLabel="label"
           optionValue="value"
-          placeholder="여행지 내 이용수단"
+          placeholder="여행지 내 주요 이용수단"
         />
       </div>
 
@@ -112,6 +117,7 @@ type placeItem = {
   address: "";
   lat: 0;
   lng: 0;
+  category: "";
 };
 const placeholderText =
   "콤마(,)로 구분하여 방문하고 싶은 여행지 내 장소를 작성해 주세요.\n예제: 경복궁, 명동, 롯데타워";
@@ -142,6 +148,8 @@ const transportOptions = [
   { label: "자동차", value: "자동차" },
   { label: "지하철", value: "지하철" },
   { label: "버스", value: "버스" },
+  { label: "도보", value: "도보" },
+  { label: "자전거", value: "자전거" },
 ];
 const visible = computed({
   get: () => {
@@ -181,11 +189,13 @@ const placesSearchCB = (
   status: kakao.maps.services.Status
 ): void => {
   if (status === kakao.maps.services.Status.OK) {
+    console.log(data);
     const placeItem: placeItem = {
       name: data[0].place_name,
       address: data[0].address_name,
       lat: data[0].y,
       lng: data[0].x,
+      category: data[0].category_name,
     };
     console.log(placeItem);
     formData.value.spots.push(placeItem);
