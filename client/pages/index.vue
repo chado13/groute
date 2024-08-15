@@ -109,6 +109,7 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useDebounceFn } from "@vueuse/core";
 import axios from "axios";
 
 const router = useRouter();
@@ -164,7 +165,7 @@ const submitForm = async () => {
   try {
     isLoading.value = true;
     const response = await axios.post(
-      "http://localhost:8000/groute",
+      "http://localhost:8000/groute/route/",
       formData.value
     );
     console.log("폼 데이터가 성공적으로 전송되었습니다:", response.data);
@@ -177,19 +178,18 @@ const submitForm = async () => {
   }
 };
 
-function searchMap() {
-  console.log(spot.value);
+const searchMap = useDebounceFn(() => {
   const keyword = spot.value;
   if (!keyword) return;
   const ps = new kakao.maps.services.Places();
   ps.keywordSearch(formData.value.destination + keyword, placesSearchCB);
-}
+}, 100);
+
 const placesSearchCB = (
   data: kakao.maps.services.PlacesSearchResult,
   status: kakao.maps.services.Status
 ): void => {
   if (status === kakao.maps.services.Status.OK) {
-    console.log(data);
     const placeItem: placeItem = {
       name: data[0].place_name,
       address: data[0].address_name,
@@ -197,7 +197,6 @@ const placesSearchCB = (
       lng: data[0].x,
       category: data[0].category_name,
     };
-    console.log(placeItem);
     formData.value.spots.push(placeItem);
   }
 };
