@@ -1,23 +1,21 @@
 [tool.poetry]
-name = "server"
+name = "app"
 version = "0.1.0"
-description = "Greate Route For Your Trip"
+description = ""
 authors = ["chado13 <geaya13@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-dotenv-python = "^0.0.1"
+python = "^3.12"
 openai = "^1.16.2"
 fastapi = "^0.110.1"
 pydantic-settings = "^2.2.1"
 uvicorn = "^0.29.0"
 requests = "^2.32.3"
 jinja2 = "^3.1.4"
+numpy = "^2.1.0"
+scikit-learn = "^1.5.1"
 
-
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.3.7"
 
 [build-system]
 requires = ["poetry-core"]

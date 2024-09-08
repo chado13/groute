@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+    volumes:
+      - .:/code
+      - python-packages:/usr/local/lib/python3.12/site-packages
+      - python-bin:/usr/local/bin
+    command: /bin/bash scripts/start-dev.sh
+
+  redis:
+    container_name: redis_server
+    restart: always
+    image: redis:6.0.1-alpine
+    ports:
+      - 16501:6379
+
+  db:
+    restart: always
+    container_name: db_server
+    image: postgres:15-alpine
+    volumes:
+      - db-volume:/var/lib/postgresql/data
+    ports:
+      - 15501:5432
+    environment:
+      - POSTGRES_DB=groute
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+
+
+volumes:
+  python-packages:
+  python-bin:
+  db-volume:
