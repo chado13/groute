@@ -1,13 +1,15 @@
 from datetime import datetime
-from typing import Annotated, TypedDict
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Body, Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field
+from app.config import config
+from app.deps import get_assistant
+from app.dto import AssistantResponse, TripData
+from app import services as service
 
-from server.deps import get_assistant
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -16,34 +18,12 @@ origins = ["http://localhost", "http://localhost:3000", "http://localhost:8080"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 router = APIRouter()
 
-class SpotData(TypedDict):
-    name: str
-    address: str
-    lat: float
-    lag: float
-    category: str
-
-class TripData(BaseModel):
-    destination: str = Field(examples=["서울"])
-    schedule: list[datetime]
-    spots: list[SpotData]
-    hotel: str | None
-    arrival: str | None
-    depart: str | None
-    transport: str
-    restorants: str
-
-
-class AssistantResponse(BaseModel):
-    assistant_id: str
-    thread_id: str
 
 
 @app.get("/groute/assistant")
@@ -71,5 +51,11 @@ def read_root(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="main.html",
-        context={"apikey": "13bf923174bc71a5dcded503e5f0416d"},
+        context={"apikey":config.kakao_map_api_key},
     )
+
+
+@app.post("/groute/route")
+def get_route(data: Annotated[TripData, Body]) -> list[dict[str, Any]]:
+    res = service.search(data)
+    return res
