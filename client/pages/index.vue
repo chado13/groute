@@ -2,7 +2,7 @@
   <div>
     <h2>여행 정보 입력</h2>
     <div class="p-fluid p-formgrid p-grid">
-      <div id="map" style="width: 100%; height: 350px"></div>
+      <!-- <div id="map" style="width: 100%; height: 350px"></div> -->
       <!-- 여행 예정지 입력 -->
       <div class="p-field p-col-12">
         <label for="destination">여행 예정 도시</label>
@@ -15,7 +15,7 @@
         <InputText
           v-model="spot"
           id="spot"
-          @keyup.enter="searchMap"
+          @keyup.enter="searchSpot"
           placeholder="장소를 입력후 엔터를 해주세요. 지점이 여러개일 경우 정확히 입력해주세요."
         />
         <Chip
@@ -41,9 +41,10 @@
       <!-- 여행 시작점 입력 -->
       <div class="p-field p-col-12">
         <label for="arrival">여행 시작점</label>
-        <Textarea
+        <InputText
+          v-model="arrival"
           id="arrival"
-          v-model="formData.arrival"
+          @keyup.enter="searchArrival"
           rows="1"
           placeholder="여행을 어디에서부터 계획할지 정해주세요. ex) 서울역, 인청공항 등"
         />
@@ -52,9 +53,10 @@
       <!-- 여행 끝점 입력 -->
       <div class="p-field p-col-12">
         <label for="depart">여행 끝</label>
-        <Textarea
+        <InputText
+          v-model="depart"
           id="depart"
-          v-model="formData.depart"
+          @keyup.enter="searchDepart"
           rows="1"
           placeholder="여행의 마지막을 어디에서 끝낼지 정해주세요. 예) 서울역, 인천공항 등"
         />
@@ -74,9 +76,10 @@
       <!-- 여행 중 숙박 장소 입력 -->
       <div class="p-field p-col-12">
         <label for="hotel">숙박</label>
-        <Textarea
+        <InputText
           id="hotel"
-          v-model="formData.hotel"
+          v-model="hotel"
+          @keyup.enter="searchHotel"
           rows="1"
           placeholder="여행 중 정해진 숙박장소가 있다면 입력해주세요. 지점이 여러개일 경우 정확히 입력해주세요."
         />
@@ -104,7 +107,7 @@
   </div>
   <ProgressSpinner class="progress-spinner" v-if="isLoading" />
   <ClientOnly>
-    <TravelResult v-model:visible="visible" :text="resultText" v-if="visible" />
+    <TravelResult v-model:visible="visible" :data="resultData" v-if="visible" />
   </ClientOnly>
 </template>
 <script setup lang="ts">
@@ -120,30 +123,33 @@ type placeItem = {
   lng: 0;
   category: "";
 };
+
 const placeholderText =
   "콤마(,)로 구분하여 방문하고 싶은 여행지 내 장소를 작성해 주세요.\n예제: 경복궁, 명동, 롯데타워";
+
 const formData = ref<{
   destination: string;
   spots: placeItem[];
-  schedule: string;
+  schedule: string[];
   transport: string;
-  arrival: string;
-  depart: string;
-  hotel: string;
-  restorants: string;
+  arrival: placeItem | null;
+  depart: placeItem | null;
+  hotel: placeItem | null;
 }>({
   destination: "",
   spots: [],
-  schedule: "",
+  schedule: [],
   transport: "",
-  arrival: "",
-  depart: "",
-  hotel: "",
-  restorants: "",
+  arrival: null,
+  depart: null,
+  hotel: null,
 });
 const spot = ref("");
+const depart = ref("");
+const arrival = ref("");
+const hotel = ref("");
 
-const resultText = ref("");
+const resultData = ref([]);
 const isLoading = ref(false);
 const transportOptions = [
   { label: "자동차", value: "자동차" },
@@ -154,22 +160,21 @@ const transportOptions = [
 ];
 const visible = computed({
   get: () => {
-    return !!resultText.value;
+    return Array.isArray(resultData.value) && resultData.value.length > 0;
   },
   set: () => {
-    resultText.value = "";
+    resultData.value = [];
   },
 });
-
 const submitForm = async () => {
   try {
     isLoading.value = true;
     const response = await axios.post(
-      "http://localhost:8000/groute/route/",
+      "http://localhost:8000/groute/route",
       formData.value
     );
     console.log("폼 데이터가 성공적으로 전송되었습니다:", response.data);
-    resultText.value = response.data;
+    resultData.value = response.data;
   } catch (error) {
     window.alert("폼 데이터 전송 중 오류 발생");
     throw error;
@@ -178,27 +183,44 @@ const submitForm = async () => {
   }
 };
 
-const searchMap = useDebounceFn(() => {
-  const keyword = spot.value;
+const searchPlaceAndAssign = useDebounceFn(async (keywordSource, field) => {
+  const keyword = keywordSource.value;
   if (!keyword) return;
-  const ps = new kakao.maps.services.Places();
-  ps.keywordSearch(formData.value.destination + keyword, placesSearchCB);
+
+  const placeItem = await searchPlace(formData.value.destination + keyword);
+  if (placeItem) {
+    if (field == "spots") {
+      formData.value.spots.push(placeItem);
+      spot.value = "";
+    } else {
+      formData.value[field] = placeItem;
+    }
+  }
 }, 100);
 
-const placesSearchCB = (
-  data: kakao.maps.services.PlacesSearchResult,
-  status: kakao.maps.services.Status
-): void => {
-  if (status === kakao.maps.services.Status.OK) {
-    const placeItem: placeItem = {
-      name: data[0].place_name,
-      address: data[0].address_name,
-      lat: data[0].y,
-      lng: data[0].x,
-      category: data[0].category_name,
-    };
-    formData.value.spots.push(placeItem);
-  }
+const searchSpot = () => searchPlaceAndAssign(spot, "spots");
+const searchArrival = () => searchPlaceAndAssign(arrival, "arrival");
+const searchDepart = () => searchPlaceAndAssign(depart, "depart");
+const searchHotel = () => searchPlaceAndAssign(hotel, "hotel");
+
+const searchPlace = (keyword) => {
+  return new Promise((resolve, reject) => {
+    const ps = new kakao.maps.services.Places();
+    ps.keywordSearch(keyword, (data, status) => {
+      if (status === kakao.maps.services.Status.OK) {
+        const placeItem = {
+          name: data[0].place_name,
+          address: data[0].address_name,
+          lat: data[0].y,
+          lng: data[0].x,
+          category: data[0].category_name,
+        };
+        resolve(placeItem);
+      } else {
+        reject("Search failed");
+      }
+    });
+  });
 };
 </script>
 
