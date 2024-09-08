@@ -20,7 +20,7 @@ def search(data: TripData) -> list[dict[str,Any]]:
     start = datetime.strptime(data.schedule[0], '%Y-%m-%dT%H:%M:%S.%fZ')
     end = datetime.strptime(data.schedule[-1], '%Y-%m-%dT%H:%M:%S.%fZ')
     n_cluster = (end - start).days + 1
-    cluster_labels = cluster_locations(waypoints, n_cluster)
+    cluster_labels = cluster_locations(list(waypoints_dict.keys()), n_cluster)
     optimized_clusters = []
     for label in set(cluster_labels):
         cluster = [waypoints[i] for i in range(len(waypoints)) if cluster_labels[i] == label]
@@ -36,8 +36,10 @@ def search(data: TripData) -> list[dict[str,Any]]:
 
 #군집화
 def cluster_locations(waypoints:list[tuple[int,int]], n_clusters: int | None) -> list[int]:
-    n_clusters = n_clusters if n_clusters else 3
-    kmeans = KMeans(n_clusters=max(n_clusters, 3))
+    n_clusters = n_clusters if n_clusters else 1
+    if n_clusters<3:
+        return [0 for i in waypoints]
+    kmeans = KMeans(n_clusters=n_clusters)
     kmeans.fit(waypoints)
     return kmeans.labels_
 
