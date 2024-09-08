@@ -5,63 +5,84 @@
     header="여행결과"
     class="result-modal"
   >
-    <!-- <KakaoMap :lat="coordinate.lat" :lng="coordinate.lng" :draggable="true">
-      <KakaoMapMarker
-        :lat="coordinate.lat"
-        :lng="coordinate.lng"
-      ></KakaoMapMarker>
-    </KakaoMap> -->
-    <KakaoMap :lat="37.566826" :lng="126.9786567">
-      <KakaoMapMarker
-        v-for="(marker, index) in props.data"
-        :order="marker.order === undefined ? index : marker.order"
-        :lat="marker.lat"
-        :lng="marker.lng"
-        :clickable="true"
-      />
-    </KakaoMap>
+    <div ref="mapContainer" style="width: 100%; height: 400px"></div>
+    <div id="items">
+      <p v-for="(value, index) in positions">{{ index + 1 }}. {{ value }}</p>
+    </div>
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import { marked } from "marked";
-import { Loader } from "@googlemaps/js-api-loader";
-import { until } from "@vueuse/core";
-import { KakaoMap, KakaoMapMarker } from "vue3-kakao-maps";
+import { ref, onMounted, watch } from "vue";
 
-const runtimeConfig = useRuntimeConfig();
-const mapApi = runtimeConfig.public.mapApi;
 const props = defineProps<{
   data: [];
 }>();
 const visible = defineModel<boolean>("visible", { required: true });
-
-const mapEl = ref<HTMLElement | null>(null);
-
-// const loader = new Loader({
-//   apiKey: mapApi, // 환경 변수에서 API 키를 가져옵니다.
-//   version: "weekly",
-//   libraries: ["maps"], // 필요한 라이브러리 옵션을 설정합니다.
-// });
-
-// const googleMaps = await loader.importLibrary("maps");
-// const { Map } = googleMaps;
-// // 맵을 초기화합니다.
-console.log(props.data);
-onMounted(async () => {
-  await until(mapEl).not.toBeNull();
-  const mapContainer = document.getElementById("mapEl"), // 지도를 표시할 div
-    mapOption = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-      level: 3, // 지도의 확대 레벨
-    };
-  // const map = new KakaoMap();
-  // const map = new Map(mapEl.value!, {
-  //   center: { lat: 37.55467224121094, lng: 126.97088623046875 },
-  //   zoom: 8,
-  // });
+const mapContainer = ref(null);
+let map = ref(null);
+let markers = ref([]);
+const positions = ref([]);
+props.data.forEach((item, index) => {
+  positions.value.push({ name: item.name, address: item.address });
 });
-console.log(props.data);
+const loadKakaoMapsScript = () => {
+  return new Promise((resolve, reject) => {
+    if (window.kakao && window.kakao.maps) {
+      resolve(true);
+    } else {
+      reject("failed load kakao map");
+    }
+  });
+};
+
+const initializeMap = async () => {
+  try {
+    await loadKakaoMapsScript();
+    map = new window.kakao.maps.Map(mapContainer.value, {
+      center: new window.kakao.maps.LatLng(37.566826, 126.9786567),
+      level: 3,
+    });
+    await addMarkers();
+  } catch (error) {
+    console.error("Failed to initialize map:", error);
+  }
+};
+
+const addMarkers = async () => {
+  // const bounds = new kakao.maps.LatLngBounds();
+  for (const [index, marker] of props.data.entries()) {
+    const position = new window.kakao.maps.LatLng(marker.lat, marker.lng);
+    const newMarker = new window.kakao.maps.Marker({
+      position: position,
+      clickable: true,
+    });
+    newMarker.setMap(map);
+    markers.value.push(newMarker);
+
+    const order = marker.order === undefined ? index : marker.order;
+    const content = `<div style=width:100%;padding:5px;">${order}</div>`;
+    const customOverlay = new window.kakao.maps.CustomOverlay({
+      position: position,
+      content: content,
+    });
+
+    customOverlay.setMap(map);
+    // 각 마커 생성 사이에 약간의 지연을 줍니다.
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    // 범위 재설정
+    // bounds.extend(
+    //   new kakao.maps.LatLng(Number(marker.lat), Number(marker.lng))
+    // );
+
+    // map.setBounds(bounds);
+    // await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+};
+
+onMounted(async () => {
+  await initializeMap();
+});
 </script>
 
 <style>
