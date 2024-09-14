@@ -12,11 +12,11 @@ from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
 
 def search(data: TripData) -> list[dict[str,Any]]:
-    start_geocode = (float(data.arrival["lat"]), float(data.arrival["lng"]))
-    end_geocode = (float(data.depart["lat"]), float(data.depart["lng"]))
+    waypoints = [(float(each["lat"]), float(each["lng"])) for each in data.spots]
+    start_geocode = (float(data.arrival["lat"]), float(data.arrival["lng"])) if data.arrival else None
+    end_geocode = (float(data.depart["lat"]), float(data.depart["lng"])) if data.depart else None
     waypoints_dict = {(float(each["lat"]), float(each["lng"])):each for each in data.spots}
     waypoints_dict.update({start_geocode:data.arrival, end_geocode:data.depart})
-    waypoints = [(float(each["lat"]), float(each["lng"])) for each in data.spots]
     start = datetime.strptime(data.schedule[0], '%Y-%m-%dT%H:%M:%S.%fZ')
     end = datetime.strptime(data.schedule[-1], '%Y-%m-%dT%H:%M:%S.%fZ')
     n_cluster = (end - start).days + 1
@@ -60,7 +60,11 @@ def optimize_cluster_path(cluster: np.ndarray) -> list[tuple[float, float]]:
 
 # 전체 경로 최적화
 def optimize_full_path(start, end, clusters):
-    all_points = [start] + [point for cluster in clusters for point in cluster] + [end]
+    all_points = [point for cluster in clusters for point in cluster]
+    if start:
+        all_points = [start] +  all_points
+    if end:
+        all_points = all_points + [end]
     distances = squareform(pdist(all_points, metric=haversine_wrapper))
     n = len(all_points)
     

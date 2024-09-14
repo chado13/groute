@@ -22,6 +22,8 @@
           v-for="spot in formData.spots"
           :key="spot.name"
           :label="spot.name"
+          removable
+          @remove="removeSpot(spot)"
         />
       </div>
 
@@ -222,6 +224,13 @@ const searchPlace = (keyword) => {
     });
   });
 };
+
+function removeSpot(spot: string) {
+  const index = formData.value.spots.findIndex((item) => item.name == spot);
+  if (index !== -1) {
+    formData.value.spots.splice(index, 1);
+  }
+}
 </script>
 
 <style scoped>

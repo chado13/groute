@@ -6,9 +6,9 @@
     class="result-modal"
   >
     <div ref="mapContainer" style="width: 100%; height: 400px"></div>
-    <div id="items">
+    <!-- <div id="items">
       <p v-for="(value, index) in positions">{{ index + 1 }}. {{ value }}</p>
-    </div>
+    </div> -->
   </Dialog>
 </template>
 
@@ -50,7 +50,7 @@ const initializeMap = async () => {
 };
 
 const addMarkers = async () => {
-  // const bounds = new kakao.maps.LatLngBounds();
+  const bounds = new kakao.maps.LatLngBounds();
   for (const [index, marker] of props.data.entries()) {
     const position = new window.kakao.maps.LatLng(marker.lat, marker.lng);
     const newMarker = new window.kakao.maps.Marker({
@@ -71,11 +71,11 @@ const addMarkers = async () => {
     // 각 마커 생성 사이에 약간의 지연을 줍니다.
     await new Promise((resolve) => setTimeout(resolve, 30));
     // 범위 재설정
-    // bounds.extend(
-    //   new kakao.maps.LatLng(Number(marker.lat), Number(marker.lng))
-    // );
+    bounds.extend(
+      new kakao.maps.LatLng(Number(marker.lat), Number(marker.lng))
+    );
 
-    // map.setBounds(bounds);
+    map.setBounds(bounds);
     // await new Promise((resolve) => setTimeout(resolve, 50));
   }
 };
@@ -87,6 +87,7 @@ onMounted(async () => {
 
 <style>
 .result-modal {
+  width: 100%;
   max-width: 768px !important;
 }
 </style>
