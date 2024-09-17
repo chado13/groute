@@ -6,9 +6,19 @@
     class="result-modal"
   >
     <div ref="mapContainer" style="width: 100%; height: 400px"></div>
-    <!-- <div id="items">
-      <p v-for="(value, index) in positions">{{ index + 1 }}. {{ value }}</p>
-    </div> -->
+    <div class="flex-container">
+      <div class="flex-item" id="result-table">
+        <p v-for="(value, index) in positions" :key="index">
+          {{ index + 1 }}. {{ value.name }}
+        </p>
+      </div>
+      <Divider layout="vertical" />
+      <div class="flex-item" id="result-table-info">
+        <p>출발일: {{ start_date }}</p>
+        <p>종료일: {{ end_date }}</p>
+        <p>여행기간: {{ period }}일</p>
+      </div>
+    </div>
   </Dialog>
 </template>
 
@@ -16,14 +26,17 @@
 import { ref, onMounted, watch } from "vue";
 
 const props = defineProps<{
-  data: [];
+  data: { start_date: Date; end_date: Date; period: number; spots: [] };
 }>();
 const visible = defineModel<boolean>("visible", { required: true });
 const mapContainer = ref(null);
 let map = ref(null);
 let markers = ref([]);
 const positions = ref([]);
-props.data.forEach((item, index) => {
+const start_date = props.data.start_date;
+const end_date = props.data.end_date;
+const period = props.data.period;
+props.data.spots.forEach((item, index) => {
   positions.value.push({ name: item.name, address: item.address });
 });
 const loadKakaoMapsScript = () => {
@@ -51,7 +64,7 @@ const initializeMap = async () => {
 
 const addMarkers = async () => {
   const bounds = new kakao.maps.LatLngBounds();
-  for (const [index, marker] of props.data.entries()) {
+  for (const [index, marker] of props.data.spots.entries()) {
     const position = new window.kakao.maps.LatLng(marker.lat, marker.lng);
     const newMarker = new window.kakao.maps.Marker({
       position: position,
@@ -89,5 +102,14 @@ onMounted(async () => {
 .result-modal {
   width: 100%;
   max-width: 768px !important;
+}
+.flex-container {
+  display: flex;
+  width: 100%;
+}
+
+.flex-item {
+  width: 50%;
+  padding: 10px;
 }
 </style>

@@ -39,7 +39,6 @@
           type="date"
         />
       </div>
-
       <!-- 여행 시작점 입력 -->
       <div class="p-field p-col-12">
         <label for="arrival">여행 시작점</label>
@@ -151,7 +150,7 @@ const depart = ref("");
 const arrival = ref("");
 const hotel = ref("");
 
-const resultData = ref([]);
+const resultData = ref({});
 const isLoading = ref(false);
 const transportOptions = [
   { label: "자동차", value: "자동차" },
@@ -162,7 +161,10 @@ const transportOptions = [
 ];
 const visible = computed({
   get: () => {
-    return Array.isArray(resultData.value) && resultData.value.length > 0;
+    console.log(resultData.value);
+    return (
+      Array.isArray(resultData.value.spots) && resultData.value.spots.length > 0
+    );
   },
   set: () => {
     resultData.value = [];
@@ -226,7 +228,10 @@ const searchPlace = (keyword) => {
 };
 
 function removeSpot(spot: string) {
-  const index = formData.value.spots.findIndex((item) => item.name == spot);
+  const index = formData.value.spots.findIndex(
+    (item) => item.name == spot.name
+  );
+  console.log(index);
   if (index !== -1) {
     formData.value.spots.splice(index, 1);
   }

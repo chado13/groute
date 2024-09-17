@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Annotated, Any
-
+from starlette.status import HTTP_200_OK
 from fastapi import APIRouter, Body, Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -9,7 +9,8 @@ from app.config import config
 from app.deps import get_assistant
 from app.dto import AssistantResponse, TripData
 from app import services as service
-
+from app.typed import ResultResponse, ResultSpotData
+from app.utils import fast_response
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -56,6 +57,12 @@ def read_root(request: Request):
 
 
 @app.post("/groute/route")
-def get_route(data: Annotated[TripData, Body]) -> list[dict[str, Any]]:
-    res = service.search(data)
-    return res
+# @fast_response(status_code=HTTP_200_OK)
+async def get_route(data: Annotated[TripData, Body]) -> dict[str, Any]:
+    res: list[ResultSpotData] = service.search(data)
+    start_date = datetime.strptime(data.schedule[0], "%Y-%m-%dT%H:%M:%S.%fZ").date()
+    end_date = datetime.strptime(data.schedule[1], "%Y-%m-%dT%H:%M:%S.%fZ").date()
+    response: ResultResponse = {
+        "start_date": start_date, "end_date": end_date, "period": (end_date - start_date).days + 1, "spots": res}
+    print(response)
+    return response

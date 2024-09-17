@@ -20,10 +20,15 @@ def search(data: TripData) -> list[dict[str,Any]]:
     start = datetime.strptime(data.schedule[0], '%Y-%m-%dT%H:%M:%S.%fZ')
     end = datetime.strptime(data.schedule[-1], '%Y-%m-%dT%H:%M:%S.%fZ')
     n_cluster = (end - start).days + 1
-    cluster_labels = cluster_locations(list(waypoints_dict.keys()), n_cluster)
+    points = [each for each in waypoints_dict.keys() if each]
+    cluster_labels = cluster_locations(points, n_cluster)
     optimized_clusters = []
+    print(points)
+    print(cluster_labels)
     for label in set(cluster_labels):
+        print(cluster_labels)
         cluster = [waypoints[i] for i in range(len(waypoints)) if cluster_labels[i] == label]
+        print(cluster)
         optimized_clusters.append(optimize_cluster_path(cluster))
     final_path = optimize_full_path(start_geocode, end_geocode, optimized_clusters)
     res = []
@@ -45,6 +50,7 @@ def cluster_locations(waypoints:list[tuple[int,int]], n_clusters: int | None) ->
 
 #군집 내 최적경로 계산
 def optimize_cluster_path(cluster: np.ndarray) -> list[tuple[float, float]]:
+    print(cluster)
     distances = squareform(pdist(cluster, metric=haversine_wrapper))
     n = len(cluster)
     best_path = list(range(n))
