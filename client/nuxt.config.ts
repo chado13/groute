@@ -10,5 +10,5 @@ export default defineNuxtConfig({
       kakaomapApi: process.env.KAKAO_API_KEY,
     },
   },
-  css: ['primevue/resources/themes/aura-light-green/theme.css']
+  css: ['primevue/resources/themes/aura-light-green/theme.css', '~/assets/css/main.css']
 })
