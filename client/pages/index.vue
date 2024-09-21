@@ -122,26 +122,18 @@
       </div>
     </div>
   <ProgressSpinner class="progress-spinner" v-if="isLoading" />
-  <ClientOnly>
+  <!-- <ClientOnly>
     <TravelResult v-model:visible="visible" :data="resultData" v-if="visible" />
-  </ClientOnly>
+  </ClientOnly> -->
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import axios from "axios";
 
 const router = useRouter();
-type placeItem = {
-  name: "";
-  address: "";
-  lat: 0;
-  lng: 0;
-  category: "";
-};
 
-const placeholderText =
-  "콤마(,)로 구분하여 방문하고 싶은 여행지 내 장소를 작성해 주세요.\n예제: 경복궁, 명동, 롯데타워";
+const placeholderText = "콤마(,)로 구분하여 방문하고 싶은 여행지 내 장소를 작성해 주세요.\n예제: 경복궁, 명동, 롯데타워";
 
 const formData = ref<{
   destination: string;
@@ -176,6 +168,7 @@ const transportOptions = [
 ];
 const visible = computed({
   get: () => {
+    console.log("get result")
     console.log(resultData.value);
     return (
       Array.isArray(resultData.value.spots) && resultData.value.spots.length > 0
@@ -185,6 +178,26 @@ const visible = computed({
     resultData.value = [];
   },
 });
+watch (visible, (newVal) => {
+  if (newVal) {
+    // Navigate to result.vue when visible is true
+    router.push({
+      name: 'result',
+      query: {
+        result_data: resultData.value,
+        visible: true
+      }
+    });
+  }
+});
+type placeItem = {
+  name: "";
+  address: "";
+  lat: 0;
+  lng: 0;
+  category: "";
+};
+
 const submitForm = async () => {
   try {
     isLoading.value = true;
@@ -264,7 +277,7 @@ function removeSpot(spot: string) {
 }
 .header-container {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   background-color: #3DAC68;
   height: 100px;

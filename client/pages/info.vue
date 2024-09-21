@@ -1,45 +1,15 @@
+
 <template>
-  <div class="container">
-    <h1>Draggable Example with Two Columns</h1>
-    <div class="draggable-container">
-      <!-- 왼쪽 리스트 -->
-      <draggable
-        v-model="leftItems"
-        group="shared"
-        item-key="name"
-        @end="onEnd"
-        @change="onChange"
-      >
-        <template #item="{ element }">
-          <div class="list-item">
-            {{ element.name }}
-          </div>
-        </template>
-      </draggable>
 
-      <!-- 구분선 (divider) -->
-      <div class="divider"></div>
-
-      <!-- 오른쪽 리스트 -->
-      <draggable
-        v-model="rightItems"
-        group="shared"
-        item-key="name"
-        @end="onEnd"
-      >
-        <template #item="{ element }">
-          <div class="list-item">
-            {{ element.name }}
-          </div>
-        </template>
-      </draggable>
-    </div>
-  </div>
 </template>
+
 
 <script setup>
 import { ref } from "vue";
 import draggable from "vuedraggable";
+
+
+
 
 // 왼쪽과 오른쪽 리스트에 들어갈 데이터
 const leftItems = ref([

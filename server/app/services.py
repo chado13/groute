@@ -36,11 +36,12 @@ def search(data: TripData) -> list[dict[str,Any]]:
     for i, lat_lng in enumerate(final_path):
         data = waypoints_dict[lat_lng].copy()
         data["order"] = i + 1
+        
         res.append(data)
     res[0]["order"] = 1
-    res[0]["cluster"] = int(min(cluster_labels))
+    res[0]["cluster"] = 0
     res[-1]["order"] = len(res)
-    res[-1]["cluster"] = int(max(cluster_labels))
+    res[-1]["cluster"] = int(max(cluster_labels)) + 1
     return res
 
 
@@ -49,14 +50,14 @@ def cluster_locations(waypoints:list[tuple[int,int]], n_clusters: int | None) ->
     n_clusters = n_clusters if n_clusters else 1
     if n_clusters < 3:
         return [0 for _ in waypoints]
-    # scaler = StandardScaler()
-    # waypoints_scaled = scaler.fit_transform(waypoints)
-    # kmeans = KMeans(n_clusters=n_clusters)
-    # kmeans.fit(waypoints_scaled)
-    # return kmeans.labels_
-    distance_matrix = haversine_distance_matrix(waypoints)
-    Z = linkage(distance_matrix, method='ward')  # 'ward' 메소드를 사용한 클러스터링
-    return fcluster(Z, n_clusters, criterion='maxclust')
+    scaler = StandardScaler()
+    waypoints_scaled = scaler.fit_transform(waypoints)
+    kmeans = KMeans(n_clusters=n_clusters)
+    kmeans.fit(waypoints_scaled)
+    return kmeans.labels_
+    # distance_matrix = haversine_distance_matrix(waypoints)
+    # Z = linkage(distance_matrix, method='ward')  # 'ward' 메소드를 사용한 클러스터링
+    # return fcluster(Z, n_clusters, criterion='maxclust')
 
 def haversine_distance_matrix(waypoints):
     return squareform(pdist(waypoints, metric=haversine))
@@ -146,3 +147,4 @@ def haversine(coord1, coord2):
 
 def haversine_wrapper(u, v):
     return haversine(u, v)
+
