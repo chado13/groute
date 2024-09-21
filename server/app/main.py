@@ -64,5 +64,4 @@ async def get_route(data: Annotated[TripData, Body]) -> dict[str, Any]:
     end_date = datetime.strptime(data.schedule[1], "%Y-%m-%dT%H:%M:%S.%fZ").date()
     response: ResultResponse = {
         "start_date": start_date, "end_date": end_date, "period": (end_date - start_date).days + 1, "spots": res}
-    print(response)
     return response

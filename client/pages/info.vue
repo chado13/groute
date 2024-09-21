@@ -1,34 +1,99 @@
 <template>
-  <div class="card flex">
-    <p class="m-0">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-      est laborum.
-    </p>
+  <div class="container">
+    <h1>Draggable Example with Two Columns</h1>
+    <div class="draggable-container">
+      <!-- 왼쪽 리스트 -->
+      <draggable
+        v-model="leftItems"
+        group="shared"
+        item-key="name"
+        @end="onEnd"
+        @change="onChange"
+      >
+        <template #item="{ element }">
+          <div class="list-item">
+            {{ element.name }}
+          </div>
+        </template>
+      </draggable>
 
-    <Divider layout="vertical" />
+      <!-- 구분선 (divider) -->
+      <div class="divider"></div>
 
-    <p class="m-0">
-      Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-      doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo
-      inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
-      Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut
-      fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem
-      sequi nesciunt. Consectetur, adipisci velit, sed quia non numquam eius
-      modi.
-    </p>
+      <!-- 오른쪽 리스트 -->
+      <draggable
+        v-model="rightItems"
+        group="shared"
+        item-key="name"
+        @end="onEnd"
+      >
+        <template #item="{ element }">
+          <div class="list-item">
+            {{ element.name }}
+          </div>
+        </template>
+      </draggable>
+    </div>
   </div>
 </template>
 
 <script setup>
-import Divider from "primevue/divider";
+import { ref } from "vue";
+import draggable from "vuedraggable";
+
+// 왼쪽과 오른쪽 리스트에 들어갈 데이터
+const leftItems = ref([
+  { name: "Item 1" },
+  { name: "Item 2" },
+  { name: "Item 3" },
+]);
+
+const rightItems = ref([
+  { name: "Item 4" },
+  { name: "Item 5" },
+  { name: "Item 6" },
+]);
+
+const onEnd = (event) => {
+  console.log("Drag ended: ", event);
+};
+
+const onChange = (event) => {
+  console.log("Drag changed: ", event);
+};
 </script>
+
 <style>
-.flex {
+.container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.draggable-container {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.draggable-container > * {
+  flex: 1;
+}
+
+.divider {
+  width: 5px;
+  background-color: #999;
+  margin: 0 10px;
+}
+
+.list-item {
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  cursor: move;
 }
 </style>

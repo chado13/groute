@@ -10,6 +10,8 @@ from app.typed import SpotData
 from app.dto import TripData
 from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
+from sklearn.preprocessing import StandardScaler
+from scipy.cluster.hierarchy import linkage, fcluster
 
 def search(data: TripData) -> list[dict[str,Any]]:
     waypoints = [(float(each["lat"]), float(each["lng"])) for each in data.spots]
@@ -22,35 +24,54 @@ def search(data: TripData) -> list[dict[str,Any]]:
     n_cluster = (end - start).days + 1
     points = [each for each in waypoints_dict.keys() if each]
     cluster_labels = cluster_locations(points, n_cluster)
-    optimized_clusters = []
-    print(points)
     print(cluster_labels)
+    for key, cluster in zip(waypoints, cluster_labels):
+        waypoints_dict[key]["cluster"] = int(cluster)
+    optimized_clusters = []
     for label in set(cluster_labels):
-        print(cluster_labels)
         cluster = [waypoints[i] for i in range(len(waypoints)) if cluster_labels[i] == label]
-        print(cluster)
         optimized_clusters.append(optimize_cluster_path(cluster))
     final_path = optimize_full_path(start_geocode, end_geocode, optimized_clusters)
     res = []
     for i, lat_lng in enumerate(final_path):
-        data = waypoints_dict[lat_lng]
+        data = waypoints_dict[lat_lng].copy()
         data["order"] = i + 1
         res.append(data)
+    res[0]["order"] = 1
+    res[0]["cluster"] = int(min(cluster_labels))
+    res[-1]["order"] = len(res)
+    res[-1]["cluster"] = int(max(cluster_labels))
     return res
 
 
 #군집화
 def cluster_locations(waypoints:list[tuple[int,int]], n_clusters: int | None) -> list[int]:
     n_clusters = n_clusters if n_clusters else 1
-    if n_clusters<3:
-        return [0 for i in waypoints]
-    kmeans = KMeans(n_clusters=n_clusters)
-    kmeans.fit(waypoints)
-    return kmeans.labels_
+    if n_clusters < 3:
+        return [0 for _ in waypoints]
+    # scaler = StandardScaler()
+    # waypoints_scaled = scaler.fit_transform(waypoints)
+    # kmeans = KMeans(n_clusters=n_clusters)
+    # kmeans.fit(waypoints_scaled)
+    # return kmeans.labels_
+    distance_matrix = haversine_distance_matrix(waypoints)
+    Z = linkage(distance_matrix, method='ward')  # 'ward' 메소드를 사용한 클러스터링
+    return fcluster(Z, n_clusters, criterion='maxclust')
 
+def haversine_distance_matrix(waypoints):
+    return squareform(pdist(waypoints, metric=haversine))
+
+def haversine(coord1, coord2):
+    lat1, lon1 = np.radians(coord1)
+    lat2, lon2 = np.radians(coord2)
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+    R = 6371.0  # 지구 반지름 (km)
+    return R * c
 #군집 내 최적경로 계산
 def optimize_cluster_path(cluster: np.ndarray) -> list[tuple[float, float]]:
-    print(cluster)
     distances = squareform(pdist(cluster, metric=haversine_wrapper))
     n = len(cluster)
     best_path = list(range(n))

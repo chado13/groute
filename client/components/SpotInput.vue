@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="flex">
     <InputText v-model="value" />
     <Button label="입력" @click="onClick" id="a" />
@@ -35,4 +35,4 @@ function onChipRemove(spot: string) {
   console.log("a");
   emit("spot-removed", spot);
 }
-</script>
+</script> -->
