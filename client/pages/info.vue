@@ -1,12 +1,21 @@
 
 <template>
-
+  <template>
+    <div class="hore__secton">
+      <Button label="Click To Get Started" icon="pi pi-check" iconPos="right" />
+      <i class="pi pi-check"></i>
+      <i class="pi pi-times"></i>
+      <span class="pi pi-search"></span>
+      <span class="pi pi-user"></span>
+    </div>
+  </template>
 </template>
 
 
 <script setup>
 import { ref } from "vue";
 import draggable from "vuedraggable";
+import "primeicons/primeicons.css";
 
 
 

@@ -60,8 +60,8 @@ def read_root(request: Request):
 # @fast_response(status_code=HTTP_200_OK)
 async def get_route(data: Annotated[TripData, Body]) -> dict[str, Any]:
     res: list[ResultSpotData] = service.search(data)
-    start_date = datetime.strptime(data.schedule[0], "%Y-%m-%dT%H:%M:%S.%fZ").date()
-    end_date = datetime.strptime(data.schedule[1], "%Y-%m-%dT%H:%M:%S.%fZ").date()
+    start_date = datetime.strptime(data.start, "%Y-%m-%dT%H:%M:%S.%fZ").date()
+    end_date = datetime.strptime(data.end, "%Y-%m-%dT%H:%M:%S.%fZ").date()
     response: ResultResponse = {
         "start_date": start_date, "end_date": end_date, "period": (end_date - start_date).days + 1, "spots": res}
     return response

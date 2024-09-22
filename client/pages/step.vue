@@ -175,9 +175,9 @@
     >
   </div>
   <ProgressSpinner class="progress-spinner" v-if="isLoading" />
-  <!-- <ClientOnly>
+  <ClientOnly>
     <TravelResult v-model:visible="visible" :data="resultData" v-if="visible" />
-  </ClientOnly> -->
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
@@ -319,7 +319,7 @@ const submitForm = async () => {
 <style scoped>
 .header-container {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   background-color: #3dac68;
   height: 100px;

@@ -5,12 +5,13 @@ from typing import Any
 
 class TripData(BaseModel):
     destination: str = Field(examples=["서울"])
-    schedule: list[datetime] | Any
+    start: datetime | Any
+    end: datetime | Any
     spots: list[SpotData]| Any
-    hotel: SpotData | None| Any
+    hotel: SpotData | None
     arrival: SpotData | None| Any
     depart: SpotData | None| Any
-    transport: str
+    transport: str | None
 
 
 class AssistantResponse(BaseModel):

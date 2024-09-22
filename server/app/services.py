@@ -19,12 +19,11 @@ def search(data: TripData) -> list[dict[str,Any]]:
     end_geocode = (float(data.depart["lat"]), float(data.depart["lng"])) if data.depart else None
     waypoints_dict = {(float(each["lat"]), float(each["lng"])):each for each in data.spots}
     waypoints_dict.update({start_geocode:data.arrival, end_geocode:data.depart})
-    start = datetime.strptime(data.schedule[0], '%Y-%m-%dT%H:%M:%S.%fZ')
-    end = datetime.strptime(data.schedule[-1], '%Y-%m-%dT%H:%M:%S.%fZ')
+    start = datetime.strptime(data.start, '%Y-%m-%dT%H:%M:%S.%fZ')
+    end = datetime.strptime(data.end, '%Y-%m-%dT%H:%M:%S.%fZ')
     n_cluster = (end - start).days + 1
     points = [each for each in waypoints_dict.keys() if each]
     cluster_labels = cluster_locations(points, n_cluster)
-    print(cluster_labels)
     for key, cluster in zip(waypoints, cluster_labels):
         waypoints_dict[key]["cluster"] = int(cluster)
     optimized_clusters = []
