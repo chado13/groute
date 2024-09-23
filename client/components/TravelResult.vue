@@ -4,17 +4,22 @@
     modal
     header="여행 경로 추천"
     class="result-modal"
+    style="width: 100%; max-width: 768px;"
   >
+    <template #header>
+      <div style="display: flex; flex-direction: column; padding-bottom:0.0rem; margin-bottom: 10px; margin-left: 10px;">
+      <h2 class="header">{{ destination }} 여행</h2>
+      <span>{{ start_date }} - {{ end_date }}</span>
+      </div>
+    </template>
   
-    <div ref="mapContainer" style="width: 100%; height: 400px"></div>
-    <div class="flex-container" id="result-header-table">
+    <div ref="mapContainer" style="width: 100%; height: 400px; margin-top: 10px;"></div>
       <!-- 여행 정보 영역 (헤더 역할) -->
       <!-- <div id="result-table-info" class="result-table-head"> -->
-        <div class="result-head"> 여행 시작: {{ start_date }}</div>
-        <div class="result-head" >여행 종료: {{ end_date }}</div>
-        <div class="result-head">여행 기간: {{ period }}일</div>
+        <!-- <div class="result-head"> 여행 시작: {{ start_date }}</div> -->
+        <!-- <div class="result-head" >여행 종료: {{ end_date }}</div> -->
+        <!-- <div class="result-head">여행 기간: {{ period }}일</div> -->
       <!-- </div> -->
-    </div>
     <div>
       <!-- 드래그 가능한 영역 -->
       <!-- <div
@@ -24,14 +29,17 @@
       >
         <p class="cluster-title">Day {{ clusterId }}</p> -->
       <draggable
-        v-model="positions"
+        v-model="newPositions"
         class="draggable-list"
         @end="updateOrder"
       >
-        <template #item="{ element, index, isDragging }">
-          <div class="draggable-item" :class="{ 'is-dragging': isDragging }">
-            <p>{{ index + 1 }}. {{ element.name }}</p>
+        <template  #item="{ element, index, isDragging }">
+          <div v-if="element.type === 'place'" class="draggable-item" :class="{ 'is-dragging': isDragging }">
+            <p>{{ element.order }}. {{ element.name }}</p>
             <span class="drag-handle">≡</span>
+          </div>
+          <div v-else>
+            {{ element.name }}
           </div>
         </template>
       </draggable>
@@ -41,17 +49,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import draggable from "vuedraggable";
+
+interface Spot {
+  name: string;
+  address: string;
+  lat: string;
+  lng: string;
+  category: string;
+  cluster: number;
+  order: number;
+}
 const props = defineProps<{
-  data: { start_date: Date; end_date: Date; period: number; spots: [] };
+  data: { destination:String; start_date: Date; end_date: Date; period: number; spots: Spot[] };
 }>();
 const visible = defineModel<boolean>("visible", { required: true });
 const mapContainer = ref(null);
 let map = ref(null);
 // let markers = ref<{ [key: string]: any[] }>({}); // 클러스터별 마커를 저장
-const positions = ref([]);
+const positions = ref<Spot[]>([]);
 const start_date = props.data.start_date;
+const destination = props.data.destination;
 const end_date = props.data.end_date;
 const period = props.data.period;
 // const overlays = ref([]);
@@ -79,6 +98,7 @@ let overlays = ref([]); // Custom overlays 추가
 props.data.spots.forEach((item, index) => {
   positions.value.push({
     name: item.name,
+    category: item.category,
     address: item.address,
     order: item.order,
     cluster: item.cluster,
@@ -86,6 +106,34 @@ props.data.spots.forEach((item, index) => {
     lng: item.lng,
   });
 });
+
+const newPositions = computed(() => {
+  const newSpots = props.data.spots;
+  const result = [];
+  let tempCluster = 0;
+
+  for(let spot of newSpots) {
+    if(spot.cluster === tempCluster) {
+      result.push({
+        name: `${tempCluster + 1}일 차`,
+        type: 'splitter',
+      })
+      tempCluster++;
+    }
+      result.push({
+        name: spot.name,
+        address: spot.address,
+        order: spot.order,
+        cluster: spot.cluster,
+        lat: spot.lat,
+        lng: spot.lng,
+        type: 'place'
+      })
+  }
+
+  return result
+})
+
 const loadKakaoMapsScript = () => {
   return new Promise((resolve, reject) => {
     if (window.kakao && window.kakao.maps) {
@@ -107,7 +155,7 @@ const initializeMap = async () => {
   } catch (error) {
     console.error("Failed to initialize map:", error);
   }
-};
+}; 
 const addMarkers = async () => {
   clearMarkers(); // 마커 초기화
   const bounds = new kakao.maps.LatLngBounds();
@@ -151,9 +199,12 @@ const addMarkers = async () => {
     overlays.value.forEach((overlay) => overlay.setMap(null)); // 모든 오버레이 제거
     overlays.value = [];
 };
-const updateOrder = () => {
-  positions.value.forEach((item, index) => {
-    item.order = index + 1; // 드래그 후 순서를 업데이트
+const updateOrder = (e) => {
+  console.log(e);
+  newPositions.value.forEach((item, index) => {
+    if(item.type === 'place') {
+      item.order = index + 1; // 드래그 후 순서를 업데이트
+    }
   });
   console.log(positions.value)
   addMarkers(); // 마커 업데이트
@@ -207,7 +258,6 @@ const changeSpot = ref("")
 const onChange = (clusterId: string, event: any) => {
   console.log("onChange");
   console.log(event);
-  console.log(event.element);
   // 드래그 중에 어떤 클러스터에서 이동했는지 확인
   oldCluster.value = event.moved.oldIndex;
   newCluster.value = event.moved.newIndex;
@@ -221,27 +271,19 @@ const onChange = (clusterId: string, event: any) => {
 
 <style scoped>
 .result-modal {
+  max-width: 768px;
   width: 100%;
-  max-width: 768px !important;
-}
-.flex-container {
-  display: inline-block;
-  width: 100%;
+  min-width: 360px;
 }
 
-.flex-item {
-  width: 50%;
-  padding: 10px;
-}
-
-.result-header-table{
+/* .result-header-table{
   display: inline-block;
   background-color: #f1f1f1;
   padding: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
   width: 100%;
-}
+} */
 /* 헤더 스타일 */
 .result-head {
   display: inline-block;
@@ -255,6 +297,7 @@ const onChange = (clusterId: string, event: any) => {
 /* 드래그 가능한 리스트 스타일 */
 .draggable-list {
   padding: 5px;
+  width:100%
 }
 
 .cluster-container {

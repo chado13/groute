@@ -56,6 +56,7 @@ def read_root(request: Request):
     )
 
 
+
 @app.post("/groute/route")
 # @fast_response(status_code=HTTP_200_OK)
 async def get_route(data: Annotated[TripData, Body]) -> dict[str, Any]:
@@ -63,5 +64,5 @@ async def get_route(data: Annotated[TripData, Body]) -> dict[str, Any]:
     start_date = datetime.strptime(data.start, "%Y-%m-%dT%H:%M:%S.%fZ").date()
     end_date = datetime.strptime(data.end, "%Y-%m-%dT%H:%M:%S.%fZ").date()
     response: ResultResponse = {
-        "start_date": start_date, "end_date": end_date, "period": (end_date - start_date).days + 1, "spots": res}
+        "destination":data.destination,"start_date": start_date, "end_date": end_date, "period": (end_date - start_date).days + 1, "spots": res}
     return response

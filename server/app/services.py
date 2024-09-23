@@ -1,3 +1,4 @@
+
 import heapq
 import math
 from app.dto import TripData
@@ -29,18 +30,32 @@ def search(data: TripData) -> list[dict[str,Any]]:
     optimized_clusters = []
     for label in set(cluster_labels):
         cluster = [waypoints[i] for i in range(len(waypoints)) if cluster_labels[i] == label]
-        optimized_clusters.append(optimize_cluster_path(cluster))
+        if cluster:
+            optimized_clusters.append(optimize_cluster_path(cluster))
     final_path = optimize_full_path(start_geocode, end_geocode, optimized_clusters)
+    # res = {i+1:[] for i in range(n_cluster)}
+    # print(res)
+    # prev_cluster = None
+    # day = 1
     res = []
     for i, lat_lng in enumerate(final_path):
         data = waypoints_dict[lat_lng].copy()
+        if data.get("cluster") is None:
+            data["cluster"] = 0 if i==0 else int(max(cluster_labels))
         data["order"] = i + 1
-        
+        print(data)
+        # if prev_cluster is None or prev_cluster == int(data["cluster"]):
+        #     res[day].append(data)
+        #     prev_cluster = int(data["cluster"])
+        # elif prev_cluster != int(data["cluster"]):
+        #     day += 1
+        #     try:
+        #         res[day].append(data)
+        #     except KeyError:
+        #         continue
+        #     prev_cluster = int(data["cluster"])
         res.append(data)
-    res[0]["order"] = 1
-    res[0]["cluster"] = 0
-    res[-1]["order"] = len(res)
-    res[-1]["cluster"] = int(max(cluster_labels)) + 1
+    print(res)
     return res
 
 

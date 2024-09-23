@@ -1,3 +1,4 @@
+
 <template>
   <div>
     <!-- Step 1 -->
@@ -175,9 +176,9 @@
     >
   </div>
   <ProgressSpinner class="progress-spinner" v-if="isLoading" />
-  <!-- <ClientOnly>
+  <ClientOnly>
     <TravelResult v-model:visible="visible" :data="resultData" v-if="visible" />
-  </ClientOnly> -->
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
@@ -317,6 +318,14 @@ const submitForm = async () => {
 };
 </script>
 <style scoped>
+.progress-spinner {
+  width: 50px;
+  height: 50px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 .header-container {
   display: flex;
   align-items: flex-end;
