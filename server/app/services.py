@@ -33,27 +33,29 @@ def search(data: TripData) -> list[dict[str,Any]]:
         if cluster:
             optimized_clusters.append(optimize_cluster_path(cluster))
     final_path = optimize_full_path(start_geocode, end_geocode, optimized_clusters)
-    # res = {i+1:[] for i in range(n_cluster)}
-    # print(res)
-    # prev_cluster = None
-    # day = 1
-    res = []
+    res = [{"name": f"day 1", "id": 0, "type":"spliter", "day":None, "order":None, "lat":None, "lng":None, "address":None, "category":None, "cluster":None}]
+    prev_cluster = None
+    day=1
+    id = 0
+    s_id = 1
     for i, lat_lng in enumerate(final_path):
         data = waypoints_dict[lat_lng].copy()
-        if data.get("cluster") is None:
-            data["cluster"] = 0 if i==0 else int(max(cluster_labels))
         data["order"] = i + 1
-        print(data)
-        # if prev_cluster is None or prev_cluster == int(data["cluster"]):
-        #     res[day].append(data)
-        #     prev_cluster = int(data["cluster"])
-        # elif prev_cluster != int(data["cluster"]):
-        #     day += 1
-        #     try:
-        #         res[day].append(data)
-        #     except KeyError:
-        #         continue
-        #     prev_cluster = int(data["cluster"])
+        data["type"] = "place"
+        data["id"] = id
+        if data.get("cluster") is None:
+            data["day"] = day
+        else:
+            if prev_cluster is None:
+                prev_cluster = int(data["cluster"])
+            if data["cluster"] != prev_cluster:
+                day += 1
+                res.append({"name": f"day {day}", "id": s_id+1, "type":"spliter", "day":day, "order":None, "lat":None, "lng":None, "address":None, "category":None, "cluster":None})
+                prev_cluster = int(data["cluster"])
+                s_id +=1
+            data["id"] = id
+            data["day"] = day
+        id += 1
         res.append(data)
     print(res)
     return res
@@ -62,8 +64,6 @@ def search(data: TripData) -> list[dict[str,Any]]:
 #군집화
 def cluster_locations(waypoints:list[tuple[int,int]], n_clusters: int | None) -> list[int]:
     n_clusters = n_clusters if n_clusters else 1
-    if n_clusters < 3:
-        return [0 for _ in waypoints]
     scaler = StandardScaler()
     waypoints_scaled = scaler.fit_transform(waypoints)
     kmeans = KMeans(n_clusters=n_clusters)

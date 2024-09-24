@@ -11,7 +11,7 @@ from app.dto import AssistantResponse, TripData
 from app import services as service
 from app.typed import ResultResponse, ResultSpotData
 from app.utils import fast_response
-
+from app import tourapi
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 origins = ["http://localhost", "http://localhost:3000", "http://localhost:8080"]
@@ -66,3 +66,9 @@ async def get_route(data: Annotated[TripData, Body]) -> dict[str, Any]:
     response: ResultResponse = {
         "destination":data.destination,"start_date": start_date, "end_date": end_date, "period": (end_date - start_date).days + 1, "spots": res}
     return response
+
+@app.get("/groute/places")
+def fetch_places(map_x: float, map_y: float, redius: int, **kwargs) -> list[dict[str, Any]]:
+    res =  tourapi.fetch_area_by_location(map_x, map_y, redius, **kwargs)
+    return [{"name":item["title"], "address":item["addr1"], "content_id":item["contentid"], "content_type_id":item["contenttypeid"],
+             "dist":item["dist"], "lat": item["mapy"], "lng": item["mapx"]} for item in res]

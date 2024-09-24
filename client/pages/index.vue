@@ -1,4 +1,3 @@
-
 <template>
   <div>
     <!-- Step 1 -->
@@ -50,6 +49,7 @@
         class="custom-input"
         v-model="formData.destination"
         placeholder="도시 이름을 입력해 주세요."
+        @keyup.enter="nextStep"
       />
       <Button
         class="custom-button"
@@ -193,8 +193,8 @@ const depart = ref("");
 const arrival = ref("");
 const isFocused = ref(false); // 포커스 상태 관리
 const isArrivalFocused = ref(false); // 첫 번째 InputText 포커스 상태
-const isDepartFocused = ref(false);  // 두 번째 InputText 포커스 상태
-console.log(isFocused)
+const isDepartFocused = ref(false); // 두 번째 InputText 포커스 상태
+console.log(isFocused);
 type placeItem = {
   name: "";
   address: "";
@@ -260,6 +260,7 @@ const searchDepart = () => searchPlaceAndAssign(depart, "depart");
 // const searchHotel = () => searchPlaceAndAssign(hotel, "hotel");
 
 const searchPlace = (keyword) => {
+  console.log(keyword);
   return new Promise((resolve, reject) => {
     const ps = new kakao.maps.services.Places();
     ps.keywordSearch(keyword, (data, status) => {
@@ -375,6 +376,7 @@ const submitForm = async () => {
   height: 44px;
   box-sizing: border-box; /* 요소가 부모 요소의 크기를 초과하지 않도록 */
   padding-inline: 20px;
+  text-align: center;
 }
 /* 버튼 스타일 */
 .custom-button {
@@ -441,7 +443,6 @@ const submitForm = async () => {
   position: relative;
   width: 100%;
 }
-
 
 /* 포커스된 상태에서 아이콘 색상 활성화 */
 .icon-activate {

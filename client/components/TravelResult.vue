@@ -4,22 +4,33 @@
     modal
     header="여행 경로 추천"
     class="result-modal"
-    style="width: 100%; max-width: 768px;"
+    style="width: 100%; max-width: 768px"
   >
     <template #header>
-      <div style="display: flex; flex-direction: column; padding-bottom:0.0rem; margin-bottom: 10px; margin-left: 10px;">
-      <h2 class="header">{{ destination }} 여행</h2>
-      <span>{{ start_date }} - {{ end_date }}</span>
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          padding-bottom: 0rem;
+          margin-bottom: 10px;
+          margin-left: 10px;
+        "
+      >
+        <h2 class="header">{{ destination }} 여행</h2>
+        <span>{{ start_date }} - {{ end_date }}</span>
       </div>
     </template>
-  
-    <div ref="mapContainer" style="width: 100%; height: 400px; margin-top: 10px;"></div>
-      <!-- 여행 정보 영역 (헤더 역할) -->
-      <!-- <div id="result-table-info" class="result-table-head"> -->
-        <!-- <div class="result-head"> 여행 시작: {{ start_date }}</div> -->
-        <!-- <div class="result-head" >여행 종료: {{ end_date }}</div> -->
-        <!-- <div class="result-head">여행 기간: {{ period }}일</div> -->
-      <!-- </div> -->
+
+    <div
+      ref="mapContainer"
+      style="width: 100%; height: 400px; margin-top: 10px"
+    ></div>
+    <!-- 여행 정보 영역 (헤더 역할) -->
+    <!-- <div id="result-table-info" class="result-table-head"> -->
+    <!-- <div class="result-head"> 여행 시작: {{ start_date }}</div> -->
+    <!-- <div class="result-head" >여행 종료: {{ end_date }}</div> -->
+    <!-- <div class="result-head">여행 기간: {{ period }}일</div> -->
+    <!-- </div> -->
     <div>
       <!-- 드래그 가능한 영역 -->
       <!-- <div
@@ -29,17 +40,28 @@
       >
         <p class="cluster-title">Day {{ clusterId }}</p> -->
       <draggable
-        v-model="newPositions"
+        v-model="positions"
         class="draggable-list"
         @end="updateOrder"
+        :move="checkIfDraggable"
+        handle=".drag-handle"
       >
-        <template  #item="{ element, index, isDragging }">
-          <div v-if="element.type === 'place'" class="draggable-item" :class="{ 'is-dragging': isDragging }">
-            <p>{{ element.order }}. {{ element.name }}</p>
-            <span class="drag-handle">≡</span>
-          </div>
-          <div v-else>
-            {{ element.name }}
+        <template #item="{ element, index, isDragging }">
+          <div
+            :class="{
+              'draggable-item': element.type === 'place',
+              'non-draggable-item': element.type !== 'place',
+              'is-dragging': isDragging,
+            }"
+            :style="getNonDraggableItemStyle(element)"
+          >
+            <p v-if="element.type === 'place'">
+              {{ element.order }}. {{ element.name }}
+            </p>
+            <p v-else>
+              {{ element.name }}
+            </p>
+            <span v-if="element.type === 'place'" class="drag-handle">≡</span>
           </div>
         </template>
       </draggable>
@@ -60,9 +82,17 @@ interface Spot {
   category: string;
   cluster: number;
   order: number;
+  type: string;
+  id: number;
 }
 const props = defineProps<{
-  data: { destination:String; start_date: Date; end_date: Date; period: number; spots: Spot[] };
+  data: {
+    destination: String;
+    start_date: Date;
+    end_date: Date;
+    period: number;
+    spots: Spot[];
+  };
 }>();
 const visible = defineModel<boolean>("visible", { required: true });
 const mapContainer = ref(null);
@@ -104,35 +134,37 @@ props.data.spots.forEach((item, index) => {
     cluster: item.cluster,
     lat: item.lat,
     lng: item.lng,
+    type: item.type,
+    id: item.id,
   });
 });
 
-const newPositions = computed(() => {
-  const newSpots = props.data.spots;
-  const result = [];
-  let tempCluster = 0;
+// const newPositions = computed(() => {
+//   const newSpots = props.data.spots;
+//   const result = [];
+//   let tempCluster = 0;
 
-  for(let spot of newSpots) {
-    if(spot.cluster === tempCluster) {
-      result.push({
-        name: `${tempCluster + 1}일 차`,
-        type: 'splitter',
-      })
-      tempCluster++;
-    }
-      result.push({
-        name: spot.name,
-        address: spot.address,
-        order: spot.order,
-        cluster: spot.cluster,
-        lat: spot.lat,
-        lng: spot.lng,
-        type: 'place'
-      })
-  }
+//   for (let spot of newSpots) {
+//     if (spot.cluster === tempCluster) {
+//       result.push({
+//         name: `${tempCluster + 1}일 차`,
+//         type: "splitter",
+//       });
+//       tempCluster++;
+//     }
+//     result.push({
+//       name: spot.name,
+//       address: spot.address,
+//       order: spot.order,
+//       cluster: spot.cluster,
+//       lat: spot.lat,
+//       lng: spot.lng,
+//       type: "place",
+//     });
+//   }
 
-  return result
-})
+//   return result;
+// });
 
 const loadKakaoMapsScript = () => {
   return new Promise((resolve, reject) => {
@@ -155,11 +187,14 @@ const initializeMap = async () => {
   } catch (error) {
     console.error("Failed to initialize map:", error);
   }
-}; 
+};
 const addMarkers = async () => {
   clearMarkers(); // 마커 초기화
   const bounds = new kakao.maps.LatLngBounds();
   for (const [index, marker] of props.data.spots.entries()) {
+    if (marker.type === "spliter") {
+      continue;
+    }
     const position = new window.kakao.maps.LatLng(marker.lat, marker.lng);
     const newMarker = new window.kakao.maps.Marker({
       position: position,
@@ -188,26 +223,39 @@ const addMarkers = async () => {
     await new Promise((resolve) => setTimeout(resolve, 30));
   }
   map.setBounds(bounds); // 모든 마커가 보이도록 범위 설정
-    // await new Promise((resolve) => setTimeout(resolve, 50));
-  }
-
-
-  const clearMarkers = () => {
-    markers.value.forEach((marker) => marker.setMap(null)); // 모든 마커 제거
-    markers.value = [];
-
-    overlays.value.forEach((overlay) => overlay.setMap(null)); // 모든 오버레이 제거
-    overlays.value = [];
+  // await new Promise((resolve) => setTimeout(resolve, 50));
 };
+
+const clearMarkers = () => {
+  markers.value.forEach((marker) => marker.setMap(null)); // 모든 마커 제거
+  markers.value = [];
+
+  overlays.value.forEach((overlay) => overlay.setMap(null)); // 모든 오버레이 제거
+  overlays.value = [];
+};
+
 const updateOrder = (e) => {
-  console.log(e);
-  newPositions.value.forEach((item, index) => {
-    if(item.type === 'place') {
-      item.order = index + 1; // 드래그 후 순서를 업데이트
+  const places = positions.value.filter((spot) => spot.type === "place");
+
+  // 필터링된 항목들에 대해 순서 업데이트
+  places.forEach((item, index) => {
+    item.order = index + 1; // 드래그 후 순서를 업데이트
+  });
+
+  // 전체 positions 배열에 필터링된 항목들 업데이트
+  positions.value.forEach((item) => {
+    if (item.type === "place") {
+      const updatedItem = places.find((place) => place.id === item.id);
+      if (updatedItem) {
+        item.order = updatedItem.order;
+      }
     }
   });
-  console.log(positions.value)
   addMarkers(); // 마커 업데이트
+};
+
+const checkIfDraggable = (event) => {
+  return event.relatedContext.element.type === "place";
 };
 // 마커와 오버레이 제거
 // const clearMarkers = () => {
@@ -223,10 +271,6 @@ const updateOrder = (e) => {
 onMounted(async () => {
   await initializeMap();
 });
-
-const oldCluster = ref("");
-const newCluster = ref("");
-const changeSpot = ref("")
 
 // // 드래그가 끝나면 순서에 맞게 order 필드를 업데이트
 // const updateOrder = () => {
@@ -253,19 +297,21 @@ const changeSpot = ref("")
 //   addMarkers();
 // };
 
-
-
-const onChange = (clusterId: string, event: any) => {
-  console.log("onChange");
-  console.log(event);
-  // 드래그 중에 어떤 클러스터에서 이동했는지 확인
-  oldCluster.value = event.moved.oldIndex;
-  newCluster.value = event.moved.newIndex;
-  changeSpot.value = event.moved.element.name
-
-  console.log("이전 클러스터:", oldCluster.value);
-  console.log("새 클러스터:", newCluster.value);
-  console.log("변경 장소:", changeSpot.value);
+// 각 non-draggable 항목의 색상을 지정하는 함수
+const getNonDraggableItemStyle = (element) => {
+  if (element.type !== "place") {
+    // id에 따라 색상을 지정
+    console.log(element);
+    switch (element.id) {
+      case 1:
+        return { backgroundColor: "#f8d7da" }; // 붉은색
+      case 2:
+        return { backgroundColor: "#d1ecf1" }; // 푸른색
+      default:
+        return { backgroundColor: "#f8f8f8" }; // 기본 배경색
+    }
+  }
+  return {};
 };
 </script>
 
@@ -297,7 +343,7 @@ const onChange = (clusterId: string, event: any) => {
 /* 드래그 가능한 리스트 스타일 */
 .draggable-list {
   padding: 5px;
-  width:100%
+  width: 100%;
 }
 
 .cluster-container {
@@ -342,5 +388,14 @@ const onChange = (clusterId: string, event: any) => {
 .is-dragging {
   background-color: #e0e0e0;
   border: 2px dashed #999;
+}
+.drag-handle {
+  cursor: move;
+}
+.non-draggable-item {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  margin-bottom: 0.5rem;
+  background-color: #f8f8f8;
 }
 </style>
