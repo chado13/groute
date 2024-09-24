@@ -303,12 +303,16 @@ const getNonDraggableItemStyle = (element) => {
     // id에 따라 색상을 지정
     console.log(element);
     switch (element.id) {
+      case 0:
+        return { backgroundColor: "#3DAC68"};
       case 1:
-        return { backgroundColor: "#f8d7da" }; // 붉은색
+        return { backgroundColor: "#FFD027" };
       case 2:
-        return { backgroundColor: "#d1ecf1" }; // 푸른색
-      default:
-        return { backgroundColor: "#f8f8f8" }; // 기본 배경색
+        return { backgroundColor: "#F35B46" };
+      case 3:
+        return { backgroundColor: "#1581FF" };
+      case 4:
+        return { backgroundColor: "#B04BFF" };
     }
   }
   return {};
@@ -393,9 +397,14 @@ const getNonDraggableItemStyle = (element) => {
   cursor: move;
 }
 .non-draggable-item {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
+  padding: 0 0.5rem;
   margin-bottom: 0.5rem;
   background-color: #f8f8f8;
+  width: 74px;
+  height: 24px;
+  line-height: 22px;
+  border-radius: 12px;
+  text-align: center;
+  font-size:14px ;
 }
 </style>
