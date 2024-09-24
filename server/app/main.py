@@ -14,11 +14,10 @@ from app.utils import fast_response
 from app import tourapi
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
-origins = ["http://localhost", "http://localhost:3000", "http://localhost:8080"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=config.origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
