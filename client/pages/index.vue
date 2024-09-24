@@ -44,19 +44,20 @@
         </svg>
       </div>
       <h2 class="step-title">어떤 도시로 떠나볼까요?</h2>
-      <div class="custom-input-container"></div>
-      <InputText
-        class="custom-input"
-        v-model="formData.destination"
-        placeholder="도시 이름을 입력해 주세요."
-        @keyup.enter="nextStep"
-      />
-      <Button
-        class="custom-button"
-        :disabled="!formData.destination"
-        @click="nextStep"
-        >다음</Button
-      >
+      <div class="custom-input-container">
+        <InputText
+          class="custom-input"
+          v-model="formData.destination"
+          placeholder="도시 이름을 입력해 주세요."
+          @keyup.enter="nextStep"
+        />
+        <Button
+          class="custom-button"
+          :disabled="!formData.destination"
+          @click="nextStep"
+          >다음</Button
+        >
+      </div>
     </div>
 
     <!-- Step 2 -->
