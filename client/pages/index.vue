@@ -77,7 +77,7 @@
           dateFormat="yy-mm-dd"
           placeholder="출발일"
         />
-        <p>-</p>
+        <p style="text-align: center; line-height: 3">-</p>
         <Calendar
           class="calendar-input"
           v-model="formData.end"

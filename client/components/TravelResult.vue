@@ -23,22 +23,12 @@
 
     <div
       ref="mapContainer"
-      style="width: 100%; height: 400px; margin-top: 10px"
+      style="width: 100%; height: 400px; margin-top: 10px; margin-bottom: 10px"
     ></div>
     <!-- 여행 정보 영역 (헤더 역할) -->
-    <!-- <div id="result-table-info" class="result-table-head"> -->
-    <!-- <div class="result-head"> 여행 시작: {{ start_date }}</div> -->
-    <!-- <div class="result-head" >여행 종료: {{ end_date }}</div> -->
-    <!-- <div class="result-head">여행 기간: {{ period }}일</div> -->
-    <!-- </div> -->
+
     <div>
       <!-- 드래그 가능한 영역 -->
-      <!-- <div
-        v-for="(clusterItems, clusterId) in groupedPositions"
-        :key="clusterId"
-        class="cluster-container"
-      >
-        <p class="cluster-title">Day {{ clusterId }}</p> -->
       <draggable
         v-model="positions"
         class="draggable-list"
@@ -55,12 +45,17 @@
             }"
             :style="getNonDraggableItemStyle(element)"
           >
-            <p v-if="element.type === 'place'">
-              {{ element.order }}. {{ element.name }}
-            </p>
-            <p v-else>
+            <div v-if="element.type === 'place'" class="place-item">
+              <p class="place-item-order">
+                {{ element.order }}
+              </p>
+              <p>
+                {{ element.name }}
+              </p>
+            </div>
+            <div v-else>
               {{ element.name }}
-            </p>
+            </div>
             <span v-if="element.type === 'place'" class="drag-handle">≡</span>
           </div>
         </template>
@@ -97,33 +92,14 @@ const props = defineProps<{
 const visible = defineModel<boolean>("visible", { required: true });
 const mapContainer = ref(null);
 let map = ref(null);
-// let markers = ref<{ [key: string]: any[] }>({}); // 클러스터별 마커를 저장
+
 const positions = ref<Spot[]>([]);
 const start_date = props.data.start_date;
 const destination = props.data.destination;
 const end_date = props.data.end_date;
-const period = props.data.period;
-// const overlays = ref([]);
+
 let markers = ref([]);
 let overlays = ref([]); // Custom overlays 추가
-
-// const position_obj = ref<{ [key: string]: any[] }>({}); // 클러스터별 아이템을 저장
-// // 데이터를 클러스터별로 분류
-// props.data.spots.forEach((item) => {
-//   if (!position_obj.value[item.cluster]) {
-//     position_obj.value[item.cluster] = [];
-//   }
-//   position_obj.value[item.cluster].push({
-//     name: item.name,
-//     address: item.address,
-//     order: item.order,
-//     cluster: item.cluster,
-//     lat: item.lat,
-//     lng: item.lng,
-//   });
-// });
-
-// const groupedPositions = ref({ ...position_obj.value }); // 클러스터별 그룹화된 아이템
 
 props.data.spots.forEach((item, index) => {
   positions.value.push({
@@ -138,33 +114,6 @@ props.data.spots.forEach((item, index) => {
     id: item.id,
   });
 });
-
-// const newPositions = computed(() => {
-//   const newSpots = props.data.spots;
-//   const result = [];
-//   let tempCluster = 0;
-
-//   for (let spot of newSpots) {
-//     if (spot.cluster === tempCluster) {
-//       result.push({
-//         name: `${tempCluster + 1}일 차`,
-//         type: "splitter",
-//       });
-//       tempCluster++;
-//     }
-//     result.push({
-//       name: spot.name,
-//       address: spot.address,
-//       order: spot.order,
-//       cluster: spot.cluster,
-//       lat: spot.lat,
-//       lng: spot.lng,
-//       type: "place",
-//     });
-//   }
-
-//   return result;
-// });
 
 const loadKakaoMapsScript = () => {
   return new Promise((resolve, reject) => {
@@ -257,54 +206,18 @@ const updateOrder = (e) => {
 const checkIfDraggable = (event) => {
   return event.relatedContext.element.type === "place";
 };
-// 마커와 오버레이 제거
-// const clearMarkers = () => {
-//   Object.values(markers.value)
-//     .flat()
-//     .forEach((marker) => marker.setMap(null)); // 모든 마커 제거
-//   markers.value = {};
-
-//   overlays.value.forEach((overlay) => overlay.setMap(null)); // 모든 오버레이 제거
-//   overlays.value = [];
-// };
 
 onMounted(async () => {
   await initializeMap();
 });
 
-// // 드래그가 끝나면 순서에 맞게 order 필드를 업데이트
-// const updateOrder = () => {
-//   console.log()
-//   console.log("updateOrder");
-//   console.log(groupedPositions)
-//   console.log(changeSpot.value)
-//   console.log("before")
-//   console.log(groupedPositions.value[oldCluster.value])
-//   groupedPositions.value[oldCluster.value] = groupedPositions.value[oldCluster.value].filter(item => item.name !== changeSpot)
-//   console.log("after")
-//   console.log(groupedPositions.value[oldCluster.value])
-//   console.log(groupedPositions.value[oldCluster.value])
-//   Object.keys(groupedPositions.value).forEach((clusterId) => {
-//     groupedPositions.value[clusterId].forEach((item, index) => {
-//       console.log(item, index)
-//       item.order = index + 1;
-//     });
-//   });
-//   oldCluster.value = ""
-//   newCluster.value = ""
-//   changeSpot.value = ""
-//   // 마커를 업데이트합니다.
-//   addMarkers();
-// };
-
 // 각 non-draggable 항목의 색상을 지정하는 함수
 const getNonDraggableItemStyle = (element) => {
   if (element.type !== "place") {
     // id에 따라 색상을 지정
-    console.log(element);
-    switch (element.id) {
+    switch (element.id % 5) {
       case 0:
-        return { backgroundColor: "#3DAC68"};
+        return { backgroundColor: "#3DAC68" };
       case 1:
         return { backgroundColor: "#FFD027" };
       case 2:
@@ -316,6 +229,13 @@ const getNonDraggableItemStyle = (element) => {
     }
   }
   return {};
+};
+
+const getBackgroundColorForPlace = (element) => {
+  const nonPlaceElement = positions.value.find((item) => item.type !== "place");
+  return nonPlaceElement
+    ? getNonDraggableItemStyle(nonPlaceElement).backgroundColor
+    : "white";
 };
 </script>
 
@@ -372,13 +292,16 @@ const getNonDraggableItemStyle = (element) => {
   position: relative; /* 핸들이 아이템 내에서 절대 위치를 갖도록 설정 */
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 8px;
   margin-bottom: 12px;
   border: 1px solid #ccc;
   background-color: #fff;
   cursor: grab;
   width: 100%;
   height: 60px;
+  justify-content: space-between;
+  border-radius: 4px;
+  box-shadow: 0px 0px 4px 0px #00000029;
 }
 
 /* 드래그 가능 아이콘 스타일 */
@@ -405,6 +328,19 @@ const getNonDraggableItemStyle = (element) => {
   line-height: 22px;
   border-radius: 12px;
   text-align: center;
-  font-size:14px ;
+  font-size: 14px;
+  color: #fff;
+}
+.place-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.place-item-order {
+  margin-right: 20px;
+  margin-left: 10px;
+  border-radius: 10px;
+  padding: 5px;
 }
 </style>

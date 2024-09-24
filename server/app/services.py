@@ -46,6 +46,7 @@ def search(data: TripData) -> list[dict[str,Any]]:
         if data.get("cluster") is None:
             data["day"] = day
         else:
+            print(data)
             if prev_cluster is None:
                 prev_cluster = int(data["cluster"])
             if data["cluster"] != prev_cluster:
@@ -57,7 +58,6 @@ def search(data: TripData) -> list[dict[str,Any]]:
             data["day"] = day
         id += 1
         res.append(data)
-    print(res)
     return res
 
 
