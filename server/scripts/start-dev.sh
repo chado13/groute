@@ -10,4 +10,4 @@ poetry install --sync
 # rm -rf ~/.netrc
 
 # python manage.py migrate;
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn api.app:app --reload --host 0.0.0.0 --port 8000

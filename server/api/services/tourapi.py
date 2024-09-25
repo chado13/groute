@@ -1,8 +1,9 @@
 from typing import Any
 
 import requests
-from config import config
 from requests.packages.urllib3 import ssl
+
+from api.config import config
 
 BASE_URL = "https://apis.data.go.kr/B551011/KorService1"
 

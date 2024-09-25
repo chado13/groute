@@ -1,14 +1,14 @@
 
 import heapq
 import math
-from app.dto import TripData
+from server.api.dto import TripData
 import numpy as np
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import pdist, squareform
 import itertools
 from typing import Any
-from app.typed import SpotData
-from app.dto import TripData
+from server.api.typed import SpotData
+from server.api.dto import TripData
 from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
 from sklearn.preprocessing import StandardScaler

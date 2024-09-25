@@ -7,7 +7,6 @@ class Settings(BaseSettings):
     # kakao_map_api_key: str
     tour_api_service_key: str
     origins: str
-
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

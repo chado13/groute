@@ -1,0 +1,29 @@
+from datetime import datetime
+from typing import Annotated, Any
+
+from fastapi import APIRouter
+from fastapi import Body
+
+from api.dto import TripData
+from api.typed import ResultSpotData, ResultResponse
+from api.services import route as service
+from api.services import tourapi
+
+router = APIRouter()
+
+
+@router.post("/groute/route")
+# @fast_response(status_code=HTTP_200_OK)
+async def get_route(data: Annotated[TripData, Body]) -> dict[str, Any]:
+    res: list[ResultSpotData] = service.search(data)
+    start_date = datetime.strptime(data.start, "%Y-%m-%dT%H:%M:%S.%fZ").date()
+    end_date = datetime.strptime(data.end, "%Y-%m-%dT%H:%M:%S.%fZ").date()
+    response: ResultResponse = {
+        "destination":data.destination,"start_date": start_date, "end_date": end_date, "period": (end_date - start_date).days + 1, "spots": res}
+    return response
+
+@router.get("/groute/places")
+def fetch_places(map_x: float, map_y: float, redius: int, **kwargs) -> list[dict[str, Any]]:
+    res =  tourapi.fetch_area_by_location(map_x, map_y, redius, **kwargs)
+    return [{"name":item["title"], "address":item["addr1"], "content_id":item["contentid"], "content_type_id":item["contenttypeid"],
+             "dist":item["dist"], "lat": item["mapy"], "lng": item["mapx"]} for item in res]

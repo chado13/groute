@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from app.typed import SpotData
+from api.typed import SpotData
 from typing import Any
 
 class TripData(BaseModel):
