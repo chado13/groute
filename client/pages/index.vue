@@ -244,11 +244,12 @@ const visible = computed({
     resultData.value = [];
   },
 });
+const apiUrl = process.env.NUXT_SERVER_URL
 const submitForm = async () => {
   try {
     isLoading.value = true;
     const response = await axios.post(
-      "http://localhost:8000/groute/route",
+      `${apiUrl}/groute/route`,
       formData.value
     );
     console.log("폼 데이터가 성공적으로 전송되었습니다:", response.data);
@@ -267,7 +268,7 @@ async function recomandation(spot: placeItem) {
   try {
     recommandLoading.value = true
     const response = await axios.get(
-      "http://localhost:8000/groute/places", { params: { lng: parseFloat(spot.lng), lat: parseFloat(spot.lat), redius: 500 } }
+      `${apiUrl}/groute/places`, { params: { lng: parseFloat(spot.lng), lat: parseFloat(spot.lat), redius: 500 } }
     );
     console.log("추천장소 요청", response.data)
     recommandationData.value = response.data
