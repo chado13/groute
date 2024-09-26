@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter
-from fastapi import Body
+from fastapi import Body, Query
 
 from api.dto import TripData
 from api.typed import ResultSpotData, ResultResponse
@@ -23,7 +23,7 @@ async def get_route(data: Annotated[TripData, Body]) -> dict[str, Any]:
     return response
 
 @router.get("/groute/places")
-def fetch_places(map_x: float, map_y: float, redius: int, **kwargs) -> list[dict[str, Any]]:
-    res =  tourapi.fetch_area_by_location(map_x, map_y, redius, **kwargs)
+def fetch_places(lng: float, lat: float, redius: int, content_type: str | None = Query(default=None)) -> list[dict[str, Any]]:
+    res =  tourapi.fetch_area_by_location(lng, lat, redius,content_type)
     return [{"name":item["title"], "address":item["addr1"], "content_id":item["contentid"], "content_type_id":item["contenttypeid"],
              "dist":item["dist"], "lat": item["mapy"], "lng": item["mapx"]} for item in res]
