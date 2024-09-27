@@ -260,7 +260,12 @@ const visible = computed({
 const submitForm = async () => {
   try {
     isLoading.value = true;
-    const response = await axios.post(`${apiUrl}/groute/route`, formData.value);
+    const response = await axios.post(`${apiUrl}/groute/route`, formData.value, {
+      headers: {
+        "Content-Type": `application/json`,
+        'ngrok-skip-browser-warning': '69420',
+      }
+    });
     console.log("폼 데이터가 성공적으로 전송되었습니다:", response.data);
     resultData.value = response.data;
   } catch (error) {
@@ -282,6 +287,10 @@ async function recomandation(spot: placeItem) {
         lat: parseFloat(spot.lat),
         redius: 500,
       },
+      headers: {
+        "Content-Type": `application/json`,
+        'ngrok-skip-browser-warning': '69420',
+      }
     });
     console.log("추천장소 요청", response.data);
     recommandationData.value = response.data;
