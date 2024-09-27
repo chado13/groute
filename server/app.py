@@ -16,8 +16,3 @@ app.add_middleware(
 )
 
 app.include_router(groute.router)
-
-# Vercel에서 사용할 수 있도록 핸들러 추가
-def handler(request):
-    return app.handle_request(request)
-
