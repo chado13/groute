@@ -81,19 +81,18 @@
             class="chip-item" />
         </div>
         <div class="recommandation" v-if="lastChipItem.trim() !== '' && spot.trim() === ''">
-          <p style="margin: 20px">{{ lastChipItem }} 주변 추천</p>
-          <div class="datatable-container">
-            <DataTable :value="recommandationData" style="margin: 25px; align-self: auto">
-              <Column field="name" header="장소"></Column>
-              <Column field="dist" header="거리">
-                <template #body="data">
-                  {{ Math.ceil(parseFloat(data.data.dist)) }} m
-                </template>
-              </Column>
-            </DataTable>
+          <p style="margin: 20px 20px 0 20px"><span style="color: #3DAC68; font-weight: 500; font-size: large">{{
+            lastChipItem
+              }}</span> 근처 여긴 어때요?
+          </p>
+          <div v-for="item in recommandationData" class="datatable-container">
+            <p class="item-name"> <img src="@/assets/img/minimarker.png" alt="Icon" class="location-icon">
+              {{ item.name }}</p>
+            <p class="item-dist">{{ Math.ceil(parseFloat(item.dist)) }} m</p>
           </div>
         </div>
         <Button class="custom-button" :disabled="formData.spots.length === 0" @click="nextStep">다음</Button>
+
       </div>
     </div>
   </div>
@@ -201,7 +200,7 @@ const searchPlaceAndAssign = useDebounceFn(async (keywordSource, field) => {
     if (field == "spots") {
       formData.value.spots.push(placeItem);
       spot.value = "";
-      lastChipItem.value = keyword;
+      lastChipItem.value = placeItem.name;
       await recomandation(placeItem);
     } else {
       formData.value[field] = placeItem;
@@ -286,6 +285,7 @@ async function recomandation(spot: placeItem) {
         lng: parseFloat(spot.lng),
         lat: parseFloat(spot.lat),
         redius: 500,
+        content_type: spot.category
       },
       headers: {
         "Content-Type": `application/json`,
@@ -293,17 +293,18 @@ async function recomandation(spot: placeItem) {
       }
     });
     console.log("추천장소 요청", response.data);
-    recommandationData.value = response.data;
+    response.data.forEach((item) => {
+      if (item.name !== lastChipItem.value) {
+        recommandationData.value.push(item)
+      }
+    });
   } catch (error) {
     throw error;
   } finally {
     recommandLoading.value = false;
   }
 }
-const distanceCeil = (data) => {
-  console.log(data);
-  return Math.ceil(parseFloat(data.dist)).toLocaleString();
-};
+
 </script>
 <style scoped>
 .progress-spinner {
@@ -478,26 +479,73 @@ const distanceCeil = (data) => {
 .recommandation {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  border: 1px solid grey;
-  margin: 30px 40px 3px 60px;
+  margin-left: 45px;
+  margin-right: 45px;
+  margin-top: 30px;
+  margin-bottom: 100px;
   width: 85%;
-  height: 70%;
-  /* Adjust width as needed */
-}
-
-.datatable-container {
-  margin: 5px;
-  max-height: 400px;
-  /* Set a maximum height for the scrollable area */
-  overflow-y: auto;
-  /* Enable vertical scrolling */
-  width: 100%;
+  height: 100%;
+  max-height: 530px;
+  background: #5AD48929;
+  /* padding: 20px, 16px, 16px, 16px; */
+  border-radius: 4px;
+  gap: 20px;
   /* Ensure the container takes the full width */
   scrollbar-width: thin;
   /* Firefox */
-  scrollbar-color: #4caf50 #fff;
+  scrollbar-color: #fff #fff;
+  overflow-y: scroll;
+  /* Enable vertical scroll */
+  overflow-x: hidden;
+  /* Disable horizontal scroll */
   /* Firefox */
+  /* Adjust width as needed */
+}
+
+/* WebKit browsers (Chrome, Safari) */
+.recommandation::-webkit-scrollbar {
+  width: 4px;
+  /* Adjust the width to make the scrollbar thin */
+}
+
+.recommandation::-webkit-scrollbar-thumb {
+  background-color: #4caf50;
+  /* Color of the scrollbar */
+  border-radius: 2px;
+  /* Optional: rounded scrollbar */
+}
+
+.recommandation::-webkit-scrollbar-track {
+  background: #fff;
+  /* Color of the track */
+}
+
+.datatable-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 5px;
+  max-height: 400px;
+  width: 100%;
+
+}
+
+.item-name {
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+  /* 이미지와 텍스트 수직 정렬 */
+}
+
+.location-icon {
+  margin-right: 8px;
+  /* 이미지와 텍스트 사이에 여백 추가 */
+}
+
+.item-dist {
+  margin-right: 20px;
+  text-align: right;
+  /* 오른쪽 정렬 */
 }
 
 .prev-step-icon {
