@@ -3,7 +3,7 @@ from typing import Any
 import requests
 from requests.packages.urllib3 import ssl
 import re
-from api.config import config
+from config import config
 
 BASIC_PARAMS ={
         "MobileOS": "ETC",

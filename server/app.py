@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.templating import Jinja2Templates
-from api.routes import groute
+from routes import groute
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")

@@ -4,10 +4,10 @@ from typing import Annotated, Any
 from fastapi import APIRouter
 from fastapi import Body, Query
 
-from api.dto import TripData
-from api.typed import ResultSpotData, ResultResponse
-from api.services import route as service
-from api.services import tourapi
+from dto import TripData
+from typed import ResultSpotData, ResultResponse
+from services import route as service
+from services import tourapi
 
 router = APIRouter()
 
