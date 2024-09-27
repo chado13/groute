@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       kakaomapApi: process.env.NUXT_ENV_KAKAO_API_KEY,
+      apiUrl: process.env.NUXT_SERVER_URL
     },
   },
   css: ['primevue/resources/themes/aura-light-green/theme.css', '~/assets/css/main.css']
