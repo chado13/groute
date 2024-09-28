@@ -1,5 +1,5 @@
 <template>
-  <div class="header-container">
+  <!-- <div class="header-container">
     <svg
       width="114"
       height="24"
@@ -39,7 +39,7 @@
         </clipPath>
       </defs>
     </svg>
-  </div>
+  </div> -->
   <div class="header-item">
     <h2>{{ destination }} 여행</h2>
     <a>
