@@ -230,10 +230,11 @@
       >경로 검색</Button
     >
   </div>
+  <div v-if="visible"></div>
   <ProgressSpinner class="progress-spinner" v-if="isLoading" />
-  <!-- <ClientOnly>
-    <TravelResult v-model:visible="visible" :data="resultData" v-if="visible" />
-  </ClientOnly> -->
+  <ClientOnly>
+    <TravelRoute v-model:visible="visible" :data="resultData" v-if="visible" />
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
@@ -396,8 +397,9 @@ const submitForm = async () => {
     );
     console.log("폼 데이터가 성공적으로 전송되었습니다:", response.data);
     resultData.value = response.data;
-    const jsonData = JSON.stringify(resultData.value);
-    router.push(`/travelroute?data=${encodeURIComponent(jsonData)}`);
+    step.value++;
+    // const jsonData = JSON.stringify(resultData.value);
+    // router.push(`/travelroute?data=${encodeURIComponent(jsonData)}`);
   } catch (error) {
     window.alert("폼 데이터 전송 중 오류 발생");
     throw error;

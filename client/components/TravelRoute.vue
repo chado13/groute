@@ -101,12 +101,22 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { ref, onMounted } from "vue";
 import draggable from "vuedraggable";
-
-const route = useRoute();
-const receivedData = JSON.parse(decodeURIComponent(route.query.data));
+const props = defineProps<{
+  data: {
+    destination: String;
+    start_date: Date;
+    end_date: Date;
+    period: number;
+    spots: Spot[];
+  };
+}>();
+// const route = useRoute();
+const router = useRouter();
+// const receivedData = JSON.parse(decodeURIComponent(route.query.data));
+const receivedData = props.data;
 const start_date = formatDate(receivedData.start_date);
 const end_date = formatDate(receivedData.end_date);
 const destination = receivedData.destination;
@@ -188,7 +198,7 @@ const initializeMap = async () => {
 const addMarkers = async () => {
   clearMarkers(); // 마커 초기화
   const bounds = new kakao.maps.LatLngBounds();
-  for (const [index, marker] of receivedData.spots.entries()) {
+  for (const [index, marker] of props.data.spots.entries()) {
     if (marker.type === "spliter") {
       continue;
     }
@@ -284,6 +294,10 @@ const getBackgroundColorForPlace = (element) => {
   return nonPlaceElement
     ? getNonDraggableItemStyle(nonPlaceElement).backgroundColor
     : "white";
+};
+
+const returnPage = () => {
+  router.push("/");
 };
 </script>
 
@@ -428,5 +442,32 @@ const getBackgroundColorForPlace = (element) => {
 .tooltip-container:hover .tooltip {
   visibility: visible;
   opacity: 1;
+}
+
+.custom-button {
+  position: absolute;
+  /* 버튼을 부모 컨테이너의 맨 아래에 위치 */
+  bottom: 20px;
+  /* 창의 아래쪽에서 20px 위에 고정 */
+  left: 50%;
+  transform: translateX(-50%);
+  /* 중앙 정렬 */
+  padding: 12px, 10px, 12px, 10px;
+  background-color: #a8a8a880;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 90%;
+  gap: 10px;
+  height: 40px;
+  transform: translateX(-50%);
+  /* 중앙 정렬 */
+
+  /* 글자 및 내용 중앙 정렬 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 </style>
