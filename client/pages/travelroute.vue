@@ -1,75 +1,115 @@
 <template>
-  <Dialog
-    v-model:visible="visible"
-    modal
-    header="여행 경로 추천"
-    class="result-modal"
-    style="width: 100%; max-width: 768px"
-  >
-    <template #header>
-      <div
-        style="
-          display: flex;
-          flex-direction: column;
-          padding-bottom: 0rem;
-          margin-bottom: 10px;
-          margin-left: 10px;
-        "
-      >
-        <h2 class="header">{{ destination }} 여행</h2>
-        <span>{{ start_date }} - {{ end_date }}</span>
-        <div class="date-and-icons">
-          <img src="@/assets/img/share.png" alt="Share" class="header-icon" />
-        </div>
+  <div class="header-container">
+    <svg
+      width="114"
+      height="24"
+      viewBox="0 0 114 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clip-path="url(#clip0_23_91)">
+        <path
+          d="M40.4377 6.5549C40.4228 2.90798 37.3474 0.381348 32.8636 0.381348H23.688V20.5408H27.7202V13.1396H31.7196L36.459 20.5408H41.0349L35.9152 12.7016C38.6786 11.8286 40.4228 9.32883 40.4377 6.5549ZM33.0835 9.75192H27.7231V4.06999H33.0835C35.1397 4.06999 36.3669 5.06813 36.3788 6.71878C36.3639 8.37241 35.1397 9.76384 33.0835 9.75192Z"
+          fill="white"
+        />
+        <path
+          d="M75.3485 11.9628C75.3336 15.1717 73.7677 17.0995 71.1796 17.0995C68.5916 17.0995 67.0257 15.1747 67.0405 11.9628V0.765747H63.0084V11.9657C62.9935 17.3468 66.265 20.9252 71.1796 20.9252C76.0943 20.9252 79.3658 17.3468 79.3777 11.9657V0.765747H75.3455V11.9657L75.3485 11.9628Z"
+          fill="white"
+        />
+        <path
+          d="M82.2656 4.56165H88.1757V20.5408H92.2079V4.56165H98.0645V0.765747H82.2656V4.56165Z"
+          fill="white"
+        />
+        <path
+          d="M105.092 16.7449V12.1296H113.019V8.65848H105.092V4.56165H113.78V0.765747H101.06V20.5408H114V16.7449H105.092Z"
+          fill="white"
+        />
+        <path
+          d="M10.3256 4.39778C10.4652 4.39778 10.599 4.40076 10.7356 4.4097H19.7805V0.584001H10.7356C10.599 0.578042 10.4652 0.572083 10.3256 0.572083C4.42739 0.575062 -0.0148197 4.99964 3.71562e-05 10.8455C-0.0148197 16.6913 4.43928 21.1158 10.3523 21.1158C15.3324 21.1158 19.0793 17.9993 19.6884 13.3036C19.7449 12.8626 19.7775 12.4067 19.7775 11.9389V9.94564H10.7327V13.3065H15.6622C15.1303 15.7527 13.1692 17.2931 10.3494 17.2931C6.64405 17.2931 4.04409 14.6294 4.05597 10.8455C4.04112 7.06147 6.62919 4.39778 10.3196 4.39778H10.3256Z"
+          fill="white"
+        />
+        <path
+          d="M51.3189 0C47.26 0 43.2041 3.47412 43.2041 9.2365C43.2041 14.9989 51.3189 24.003 51.3189 24.003C51.3189 24.003 59.4338 14.9989 59.4338 9.2365C59.4338 3.47412 55.3779 0 51.3189 0ZM51.3189 13.2708C48.7962 13.2708 46.7519 11.2209 46.7519 8.69125C46.7519 6.16164 48.7962 4.11173 51.3189 4.11173C53.8416 4.11173 55.886 6.16164 55.886 8.69125C55.886 11.2209 53.8416 13.2708 51.3189 13.2708Z"
+          fill="white"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_23_91">
+          <rect width="114" height="24" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  </div>
+  <div class="header-item">
+    <h2>{{ destination }} 여행</h2>
+    <a>
+      <div class="tooltip-container">
+        <img
+          src="@/assets/img/share.png"
+          style="margin-right: 10px"
+          class="icon"
+        />
+        <span v-if="tooltip" class="tooltip">공유기능을 준비중이에요.</span>
       </div>
-    </template>
-
-    <div
-      ref="mapContainer"
-      style="width: 100%; height: 400px; margin-top: 10px; margin-bottom: 10px"
-    ></div>
-    <!-- 여행 정보 영역 (헤더 역할) -->
-
-    <div>
-      <!-- 드래그 가능한 영역 -->
-      <draggable
-        v-model="positions"
-        class="draggable-list"
-        @end="updateOrder"
-        :move="checkIfDraggable"
-        handle=".drag-handle"
-      >
-        <template #item="{ element, index, isDragging }">
-          <div
-            :class="{
-              'draggable-item': element.type === 'place',
-              'non-draggable-item': element.type !== 'place',
-              'is-dragging': isDragging,
-            }"
-            :style="getNonDraggableItemStyle(element)"
-          >
-            <div v-if="element.type === 'place'" class="place-item">
-              <p class="place-item-order">
-                {{ element.order }}
-              </p>
-              <p>
-                {{ element.name }}
-              </p>
-            </div>
-            <div v-else>
+      <div class="tooltip-container">
+        <img src="@/assets/img/map.png" class="icon" />
+        <span v-if="tooltip" class="tooltip"
+          >일자별 지도기능을 준비중이에요.</span
+        >
+      </div>
+    </a>
+  </div>
+  <span style="margin-left: 20px">{{ start_date }} - {{ end_date }}</span>
+  <div
+    ref="mapContainer"
+    style="width: 100%; height: 400px; margin-top: 10px; margin-bottom: 10px"
+  ></div>
+  <div style="margin-top: 30px">
+    <!-- 드래그 가능한 영역 -->
+    <draggable
+      v-model="positions"
+      class="draggable-list"
+      @end="updateOrder"
+      :move="checkIfDraggable"
+      handle=".drag-handle"
+    >
+      <template #item="{ element, index, isDragging }">
+        <div
+          :class="{
+            'draggable-item': element.type === 'place',
+            'non-draggable-item': element.type !== 'place',
+            'is-dragging': isDragging,
+          }"
+          :style="getNonDraggableItemStyle(element)"
+        >
+          <div v-if="element.type === 'place'" class="place-item">
+            <p class="place-item-order">
+              {{ element.order }}
+            </p>
+            <p>
               {{ element.name }}
-            </div>
-            <span v-if="element.type === 'place'" class="drag-handle">≡</span>
+            </p>
           </div>
-        </template>
-      </draggable>
-    </div>
-  </Dialog>
+          <div v-else>
+            {{ element.name }}
+          </div>
+          <span v-if="element.type === 'place'" class="drag-handle">≡</span>
+        </div>
+      </template>
+    </draggable>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { useRoute } from "vue-router";
 import { ref, onMounted } from "vue";
 import draggable from "vuedraggable";
+
+const route = useRoute();
+const receivedData = JSON.parse(decodeURIComponent(route.query.data));
+const start_date = formatDate(receivedData.start_date);
+const end_date = formatDate(receivedData.end_date);
+const destination = receivedData.destination;
 
 interface Spot {
   name: string;
@@ -82,28 +122,25 @@ interface Spot {
   type: string;
   id: number;
 }
-const props = defineProps<{
-  data: {
-    destination: String;
-    start_date: Date;
-    end_date: Date;
-    period: number;
-    spots: Spot[];
-  };
-}>();
-const visible = defineModel<boolean>("visible", { required: true });
 const mapContainer = ref(null);
 let map = ref(null);
 
 const positions = ref<Spot[]>([]);
-const start_date = props.data.start_date;
-const destination = props.data.destination;
-const end_date = props.data.end_date;
 
 let markers = ref([]);
 let overlays = ref([]); // Custom overlays 추가
 
-props.data.spots.forEach((item, index) => {
+const tooltip = ref("");
+
+const showTooltip = (text) => {
+  tooltip.value = text;
+};
+
+const hideTooltip = () => {
+  tooltip.value = "";
+};
+
+receivedData.spots.forEach((item, index) => {
   positions.value.push({
     name: item.name,
     category: item.category,
@@ -116,6 +153,15 @@ props.data.spots.forEach((item, index) => {
     id: item.id,
   });
 });
+
+// 날짜 형식화 함수
+function formatDate(strDate) {
+  const date = new Date(strDate);
+  const year = date.getUTCFullYear().toString().slice(-2); // 연도
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // 월
+  const day = String(date.getUTCDate()).padStart(2, "0"); // 일
+  return `${year}.${month}.${day}`;
+}
 
 const loadKakaoMapsScript = () => {
   return new Promise((resolve, reject) => {
@@ -142,7 +188,7 @@ const initializeMap = async () => {
 const addMarkers = async () => {
   clearMarkers(); // 마커 초기화
   const bounds = new kakao.maps.LatLngBounds();
-  for (const [index, marker] of props.data.spots.entries()) {
+  for (const [index, marker] of receivedData.spots.entries()) {
     if (marker.type === "spliter") {
       continue;
     }
@@ -242,28 +288,23 @@ const getBackgroundColorForPlace = (element) => {
 </script>
 
 <style scoped>
-.result-modal {
-  max-width: 768px;
-  width: 100%;
-  min-width: 360px;
+.header-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background-color: #3dac68;
+  height: 100px;
+  padding: 20px;
+  width: 100vw;
+  box-sizing: border-box;
+  /* 패딩과 테두리를 포함한 전체 너비 및 높이 계산 */
 }
-
-/* .result-header-table{
-  display: inline-block;
-  background-color: #f1f1f1;
-  padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  width: 100%;
-} */
-/* 헤더 스타일 */
-.result-head {
-  display: inline-block;
-  background-color: #f1f1f1;
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
-  margin-bottom: 10px;
-  width: 100%;
+.header-item {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 20px;
+  margin-right: 20px;
+  align-items: center;
 }
 
 /* 드래그 가능한 리스트 스타일 */
@@ -356,5 +397,36 @@ const getBackgroundColorForPlace = (element) => {
   width: 24px;
   height: 24px;
   cursor: pointer;
+}
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  margin-right: 10px; /* 아이콘 사이의 간격 조절 */
+}
+
+.icon {
+  cursor: pointer;
+}
+
+.tooltip {
+  visibility: hidden;
+  position: absolute;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px;
+  z-index: 1;
+  bottom: 125%; /* 아이콘 위쪽에 위치 */
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  width: 100px; /* 툴팁 너비 조정 */
+}
+
+.tooltip-container:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
 }
 </style>
