@@ -94,7 +94,7 @@
               class="non-draggable-item"
               :style="getNonDraggableItemStyle(element)"
             >
-              day {{ element.id + 1 }}
+              day {{ element.id }}
             </div>
             <div class="non-draggable-date">{{ element.name }}</div>
             <div

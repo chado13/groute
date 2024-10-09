@@ -44,7 +44,7 @@ def search(data: TripData, start: datetime, end: datetime) -> list[dict[str, Any
     res = [
         {
             "name": start.strftime("%m.%d"),
-            "id": 0,
+            "id": 1,
             "type": "spliter",
             "day": None,
             "order": None,
@@ -71,11 +71,12 @@ def search(data: TripData, start: datetime, end: datetime) -> list[dict[str, Any
                 prev_cluster = int(data["cluster"])
             if data["cluster"] != prev_cluster:
                 day += 1
+                s_id += 1
                 name = (start + timedelta(days=day - 1)).strftime("%m.%d")
                 res.append(
                     {
                         "name": name,
-                        "id": s_id + 1,
+                        "id": s_id,
                         "type": "spliter",
                         "day": day,
                         "order": None,
@@ -87,7 +88,6 @@ def search(data: TripData, start: datetime, end: datetime) -> list[dict[str, Any
                     }
                 )
                 prev_cluster = int(data["cluster"])
-                s_id += 1
             data["id"] = id
             data["day"] = day
         id += 1
