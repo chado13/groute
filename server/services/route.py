@@ -38,9 +38,19 @@ def search(data: TripData, start: datetime, end: datetime) -> list[dict[str, Any
         cluster = [
             waypoints[i] for i in range(len(waypoints)) if cluster_labels[i] == label
         ]
+        print(cluster)
         if cluster:
             optimized_clusters.append(optimize_cluster_path(cluster))
     final_path = optimize_full_path(start_geocode, end_geocode, optimized_clusters)
+
+    cluster_groups = {}
+    for lat_lng in final_path:
+        data = waypoints_dict[lat_lng]
+        cluster = data.get("cluster")
+        if cluster is not None:
+            if cluster not in cluster_groups:
+                cluster_groups[cluster] = []
+            cluster_groups[cluster].append(lat_lng)
     res = [
         {
             "name": start.strftime("%m.%d"),
@@ -59,23 +69,34 @@ def search(data: TripData, start: datetime, end: datetime) -> list[dict[str, Any
     day = 1
     id = 0
     s_id = 1
+    order = 1
+    processed_points = set()
     for i, lat_lng in enumerate(final_path):
+        if lat_lng != start_geocode or lat_lng != end_geocode:
+            if lat_lng in processed_points:
+                continue
         data = waypoints_dict[lat_lng].copy()
-        data["order"] = i + 1
-        data["type"] = "place"
-        data["id"] = id
-        if data.get("cluster") is None:
-            data["day"] = day
-        else:
-            if prev_cluster is None:
-                prev_cluster = int(data["cluster"])
-            if data["cluster"] != prev_cluster:
+        cluster = data.get("cluster")
+        if cluster is not None and cluster in cluster_groups.keys():
+            for point in cluster_groups[cluster]:
+                point_data = waypoints_dict[point].copy()
+                point_data["order"] = order
+                point_data["type"] = "place"
+                point_data["id"] = id
+                point_data["day"] = day
+                res.append(point_data)
+                processed_points.add(point)
+                id += 1
+                order += 1
+            # 다음 날짜로 이동
+
+            dt = start + timedelta(days=day - 1)
+            if dt < end:
                 day += 1
                 s_id += 1
-                name = (start + timedelta(days=day - 1)).strftime("%m.%d")
                 res.append(
                     {
-                        "name": name,
+                        "name": dt.strftime("%m.%d"),
                         "id": s_id,
                         "type": "spliter",
                         "day": day,
@@ -87,11 +108,16 @@ def search(data: TripData, start: datetime, end: datetime) -> list[dict[str, Any
                         "cluster": None,
                     }
                 )
-                prev_cluster = int(data["cluster"])
+        else:
+            # 클러스터가 없는 지점 처리(시작점, 종료점)
+            data["order"] = i + 1
+            data["type"] = "place"
             data["id"] = id
             data["day"] = day
-        id += 1
-        res.append(data)
+            res.append(data)
+            processed_points.add(lat_lng)
+            id += 1
+            order += 1
     return res
 
 
