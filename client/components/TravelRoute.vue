@@ -62,7 +62,7 @@
   <span style="margin-left: 20px">{{ start_date }} - {{ end_date }}</span>
   <div
     ref="mapContainer"
-    style="width: 100%; height: 400px; margin-top: 10px; margin-bottom: 10px"
+    style="width: 100%; height: 216px; margin-top: 10px; margin-bottom: 10px"
   ></div>
   <div style="margin-top: 30px">
     <!-- 드래그 가능한 영역 -->
@@ -77,10 +77,9 @@
         <div
           :class="{
             'draggable-item': element.type === 'place',
-            'non-draggable-item': element.type !== 'place',
+            'non-draggable-container': element.type !== 'place',
             'is-dragging': isDragging,
           }"
-          :style="getNonDraggableItemStyle(element)"
         >
           <div v-if="element.type === 'place'" class="place-item">
             <p class="place-item-order">
@@ -90,8 +89,18 @@
               {{ element.name }}
             </p>
           </div>
-          <div v-else>
-            {{ element.name }}
+          <div v-else class="non-draggable-wrapper">
+            <div
+              class="non-draggable-item"
+              :style="getNonDraggableItemStyle(element)"
+            >
+              day {{ element.id + 1 }}
+            </div>
+            <div class="non-draggable-date">{{ element.name }}</div>
+            <div
+              class="non-draggable-weather"
+              v-html="getWeather(element)"
+            ></div>
           </div>
           <span v-if="element.type === 'place'" class="drag-handle">≡</span>
         </div>
@@ -104,6 +113,22 @@
 import { useRouter, useRoute } from "vue-router";
 import { ref, onMounted } from "vue";
 import draggable from "vuedraggable";
+import clearImg from "@/assets/img/weathers/clear.png";
+import rainyImg from "@/assets/img/weathers/rain.png";
+import mostlyCloudyImg from "@/assets/img/weathers/mostly_cloudy.png";
+import cloudyWithRainImg from "@/assets/img/weathers/cloudy_with_rain.png";
+import snowImg from "@/assets/img/weathers/snow.png";
+import cloudyImg from "@/assets/img/weathers/cloudy.png";
+
+const weatherImages = {
+  clear: clearImg,
+  rain: rainyImg,
+  mostly_cloudy: mostlyCloudyImg,
+  cloudy_with_rain: cloudyWithRainImg,
+  snow: snowImg,
+  cloudy: cloudyImg,
+};
+
 const props = defineProps<{
   data: {
     destination: String;
@@ -111,6 +136,7 @@ const props = defineProps<{
     end_date: Date;
     period: number;
     spots: Spot[];
+    weathers: [];
   };
 }>();
 // const route = useRoute();
@@ -120,7 +146,10 @@ const receivedData = props.data;
 const start_date = formatDate(receivedData.start_date);
 const end_date = formatDate(receivedData.end_date);
 const destination = receivedData.destination;
-
+const weathers = ref([]);
+receivedData.weathers.forEach((item) => {
+  weathers.value.push(item);
+});
 interface Spot {
   name: string;
   address: string;
@@ -288,6 +317,30 @@ const getNonDraggableItemStyle = (element) => {
   }
   return {};
 };
+const weather_code = {
+  "00": "clear",
+  "10": "clear",
+  "12": "rain",
+  "13": "rain",
+  "14": "rain",
+  "30": "mostly_cloudy",
+  "31": "cloudy_with_rain",
+  "32": "snow",
+  "33": "rain",
+  "34": "rain",
+  "40": "cloudy",
+  "41": "rain",
+  "42": "snow",
+  "43": "rain",
+  "44": "rain",
+};
+function getWeather(element) {
+  const code = weathers.value[element.id];
+  const weather = weather_code[code];
+  console.log(code);
+  console.log(weather);
+  return `<img src="${weatherImages[weather]}" alt="${weather}" style="width: 24px; height: 24px;">`;
+}
 
 const getBackgroundColorForPlace = (element) => {
   const nonPlaceElement = positions.value.find((item) => item.type !== "place");
@@ -343,6 +396,7 @@ const returnPage = () => {
 .draggable-list {
   display: flex;
   flex-direction: column; /* 아이템들을 세로로 쌓음 */
+  left: 16px;
 }
 /* 드래그 가능한 아이템 스타일 */
 .draggable-item {
@@ -355,7 +409,7 @@ const returnPage = () => {
   background-color: #fff;
   cursor: grab;
   width: 100%;
-  height: 60px;
+  height: 36px;
   justify-content: space-between;
   border-radius: 4px;
   box-shadow: 0px 0px 4px 0px #00000029;
@@ -377,16 +431,17 @@ const returnPage = () => {
   cursor: move;
 }
 .non-draggable-item {
-  padding: 0 0.5rem;
+  padding: 2px 8px 2px 8px;
   margin-bottom: 0.5rem;
   background-color: #f8f8f8;
-  width: 74px;
+  width: 52px;
   height: 24px;
   line-height: 22px;
-  border-radius: 12px;
+  border-radius: 100px;
   text-align: center;
   font-size: 14px;
   color: #fff;
+  gap: 10px;
 }
 .place-item {
   display: flex;
@@ -469,5 +524,29 @@ const returnPage = () => {
   justify-content: center;
   align-items: center;
   text-align: center;
+}
+.non-draggable-container {
+  display: flex;
+}
+.non-draggable-weather {
+  display: flex;
+  padding-bottom: 10px;
+  height: 24px;
+  align-items: center;
+}
+.non-draggable-wrapper {
+  display: flex;
+  align-items: center;
+}
+.non-draggable-date {
+  display: flex;
+  color: #a8a8a8;
+  line-height: 20px;
+  size: 40px;
+  font-weight: 400;
+  margin-left: 10px;
+  margin-right: 10px;
+  padding-bottom: 10px;
+  height: 24px;
 }
 </style>

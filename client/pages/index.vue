@@ -184,7 +184,7 @@
         <i
           class="pi pi-arrow-right search-icon"
           :class="{ 'icon-activate': arrival || isArrivalFocused }"
-          @click="searchSpot"
+          @click="searchArrival"
         ></i>
       </div>
     </div>
@@ -206,7 +206,7 @@
           class="pi pi-arrow-right search-icon"
           style="top: 70%"
           :class="{ 'icon-activate': depart || isDepartFocused }"
-          @click="searchSpot"
+          @click="searchDepart"
         ></i>
       </div>
     </div>
@@ -464,14 +464,16 @@ async function recomandation(spot: placeItem) {
         "ngrok-skip-browser-warning": "69420",
       },
     });
-    response.data.forEach((item) => {
-      let text = item.name.replace(/\s+/g, "");
-      let str = lastChipItem.value.replace(/\s+/g, "");
-      const matchResult = text.match(str);
-      if (!matchResult) {
-        recommandationData.value.push(item);
-      }
-    });
+    if (response.data.length > 0) {
+      response.data.forEach((item) => {
+        let text = item.name.replace(/\s+/g, "");
+        let str = lastChipItem.value.replace(/\s+/g, "");
+        const matchResult = text.match(str);
+        if (!matchResult) {
+          recommandationData.value.push(item);
+        }
+      });
+    }
   } catch (error) {
     throw error;
   } finally {

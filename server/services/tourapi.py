@@ -5,11 +5,11 @@ from requests.packages.urllib3 import ssl
 import re
 from config import config
 
-BASIC_PARAMS ={
-        "MobileOS": "ETC",
-        "MobileApp": "AppTest",
-        "_type": "json",
-        "serviceKey": config.tour_api_service_key
+BASIC_PARAMS = {
+    "MobileOS": "ETC",
+    "MobileApp": "AppTest",
+    "_type": "json",
+    "serviceKey": config.tour_api_service_key,
 }
 HEADERS = {
     "Content-Type": "application/json",
@@ -17,15 +17,16 @@ HEADERS = {
 }
 BASE_URL = "https://apis.data.go.kr/B551011/KorService1"
 CATEGORY = {
-    "관광지":12, 
-    "문화시설":14, 
-    "축제공연행사":15, 
-    "여행코스":25,
-    "레포츠":28,
-    "숙박":32, 
-    "쇼핑":38,
-    "음식점":39
+    "관광지": 12,
+    "문화시설": 14,
+    "축제공연행사": 15,
+    "여행코스": 25,
+    "레포츠": 28,
+    "숙박": 32,
+    "쇼핑": 38,
+    "음식점": 39,
 }
+
 
 def fetch_all_area_code() -> list[dict[str, Any]]:
     path = "/areaCode1"
@@ -69,7 +70,10 @@ def fetch_area_spot_list(area_code: str, num_of_rows: int) -> list[dict[str, Any
             break
     return result
 
-def fetch_area_by_location(map_x: float, map_y: float, redius: int, content_type: str | None):
+
+def fetch_area_by_location(
+    map_x: float, map_y: float, redius: int, content_type: str | None
+):
     content = None
     if content_type:
         categories = content_type.split(">")
@@ -85,16 +89,19 @@ def fetch_area_by_location(map_x: float, map_y: float, redius: int, content_type
         "mapY": map_y,
         "radius": redius,
         "numOfRows": 10,
-        "contentTypeId":category_id,
-        **BASIC_PARAMS
+        "contentTypeId": category_id,
+        **BASIC_PARAMS,
     }
     path = "/locationBasedList1"
     url = BASE_URL + path
     session = requests.session()
-    session.mount('https://', TLSAdapter())
+    session.mount("https://", TLSAdapter())
     res = session.get(url, params=params)
-    return res.json()["response"]["body"]["items"]["item"]
-
+    try:
+        data = res.json()["response"]["body"]["items"]["item"]
+    except TypeError:
+        return None
+    return data
 
 
 class TLSAdapter(requests.adapters.HTTPAdapter):
