@@ -186,3 +186,5 @@ logs
 !.env.example
 *.crt
 *.key
+
+*.ipynb
