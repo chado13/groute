@@ -64,7 +64,11 @@ def fetch_area_spot_list(area_code: str, num_of_rows: int) -> list[dict[str, Any
             "arrange": "A",  # 제목순
         }
         res = session.get(url, params=params)
-        data = res.json()["response"]["body"]["items"]["item"]
+        try:
+            data = res.json()["response"]["body"]["items"]["item"]
+        except Exception as e:
+            print(e)
+            return []
         result += data
         if len(data) < num_of_rows:
             break

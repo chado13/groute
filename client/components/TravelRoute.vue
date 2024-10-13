@@ -334,8 +334,10 @@ const weather_code = {
   "43": "rain",
   "44": "rain",
 };
+console.log(weathers.value);
 function getWeather(element) {
-  const code = weathers.value[element.id];
+  console.log(element.id);
+  const code = weathers.value[element.id - 1];
   const weather = weather_code[code];
   console.log(code);
   console.log(weather);
