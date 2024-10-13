@@ -32,7 +32,7 @@ async def get_route(data: Annotated[TripData, Body]) -> dict[str, Any]:
     res: list[ResultSpotData] = service.search(data, start_date, end_date)
     days = (start_date - datetime.now().date()).days
     if days > 10:
-        weather = [None for i in range(0, days)]
+        weathers = [None for i in range(0, days)]
     else:
         x = float(data.spots[0]["lat"])
         y = float(data.spots[0]["lng"])
