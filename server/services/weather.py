@@ -166,7 +166,10 @@ def fetch_short_term_weathers(now: datetime.datetime, x: int, y: int) -> pl.Data
     session = requests.session()
     session.mount("https://", TLSAdapter())
     res = session.get(url, params=params)
-    items = res.json()["response"]["body"]["items"]["item"]
+    try:
+        items = res.json()["response"]["body"]["items"]["item"]
+    except Exception:
+        return pl.DataFrame()
     df = pl.DataFrame(items)
     if df.is_empty():
         return df
